@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "description": "Panchavati Police Station daily duty chart — clean rebuild (P0: database foundation)",
+  "packageManager": "npm@10.8.2",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
   },
   "scripts": {
     "dev": "tsx watch server/index.ts",

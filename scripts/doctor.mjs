@@ -31,8 +31,8 @@ console.log("panchavati doctor\n");
 // 1. Node
 {
   const major = Number(process.versions.node.split(".")[0]);
-  if (major >= 20) ok("Node version", process.versions.node);
-  else bad("Node version", `${process.versions.node} (need >=20)`);
+  if (major >= 22) ok("Node version", process.versions.node);
+  else bad("Node version", `${process.versions.node} (need >=22)`);
 }
 
 // 2. Migration files vs applied checksums (file-level, no DB needed for drift shape)
@@ -49,6 +49,7 @@ for (const dbName of [DEV_DB, TEST_DB]) {
     port: Number(process.env.PGPORT ?? 5432),
     user: process.env.PGUSER ?? "postgres",
     database: dbName,
+    ...(process.env.PGPASSWORD ? { password: process.env.PGPASSWORD } : {}),
   });
   try {
     await client.connect();

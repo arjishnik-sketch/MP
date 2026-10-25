@@ -20,7 +20,7 @@ services:
     maxShutdownDelaySeconds: 30
     envVars:
       - key: NODE_VERSION
-        value: 20.18.0
+        value: 22.14.0
       - key: NODE_ENV
         value: production
       - key: HOST
@@ -73,6 +73,6 @@ databases:
     plan: free
     region: oregon
     databaseName: panchavati3_dev
-    databaseUser: panchavati
+    user: panchavati
     postgresMajorVersion: "17"
     ipAllowList: []
