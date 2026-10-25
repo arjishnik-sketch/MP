@@ -20,6 +20,8 @@
     "db:seed:chart": "tsx db/seed-chart-1009.ts",
     "db:seed": "npm run db:seed:reference && npm run db:seed:chart",
     "db:setup": "npm run db:create && npm run db:migrate && npm run db:seed",
+    "db:wait": "node scripts/wait-for-db.mjs",
+    "render:start": "npm run db:wait && npm run db:migrate && npm run db:seed && npm start",
     "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {

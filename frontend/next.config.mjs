@@ -7,7 +7,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const fastifyUrl = process.env.FASTIFY_URL || "http://127.0.0.1:3100";
+let fastifyUrl = (process.env.FASTIFY_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3100").trim().replace(/\/+$/, "");
+if (!/^https?:\/\//i.test(fastifyUrl)) {
+  fastifyUrl = `https://${fastifyUrl}`;
+}
 const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
