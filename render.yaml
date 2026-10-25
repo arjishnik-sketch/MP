@@ -17,7 +17,6 @@ services:
     buildCommand: npm ci --include=dev && npm --prefix frontend ci && npm --prefix frontend run build
     startCommand: npm run render:start
     healthCheckPath: /health
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: NODE_VERSION
         value: 22.14.0
