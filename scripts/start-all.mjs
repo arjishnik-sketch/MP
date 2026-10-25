@@ -34,14 +34,22 @@ if (process.env.DATABASE_URL) {
   }
 
   // Run reference seed and chart seed (preserving existing if PANCHAVATI_KEEP_EXISTING=1)
-  spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-reference.ts")], {
+  const seedRefRes = spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-reference.ts")], {
     cwd: root,
     stdio: "inherit",
   });
-  spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-chart-1009.ts")], {
+  if (seedRefRes.status !== 0) {
+    console.error("[supervisor] Reference seed failed. Exiting.");
+    process.exit(1);
+  }
+  const seedChartRes = spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-chart-1009.ts")], {
     cwd: root,
     stdio: "inherit",
   });
+  if (seedChartRes.status !== 0) {
+    console.error("[supervisor] Chart seed failed. Exiting.");
+    process.exit(1);
+  }
 }
 
 // 2. Check if user explicitly wants API alone

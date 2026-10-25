@@ -10,9 +10,11 @@ const RETRY_INTERVAL_MS = Number(process.env.DB_WAIT_INTERVAL_MS) || 2000;
 
 function getClientConfig() {
   if (process.env.DATABASE_URL) {
+    const isLocal = /@(127\.0\.0\.1|localhost)(:\d+)?\//.test(process.env.DATABASE_URL);
+    const useSsl = process.env.PGSSLMODE === "disable" || isLocal ? false : { rejectUnauthorized: false };
     return {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      ...(useSsl ? { ssl: useSsl } : {}),
       connectionTimeoutMillis: 5000,
     };
   }

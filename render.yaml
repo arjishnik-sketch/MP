@@ -14,11 +14,13 @@ services:
     region: oregon
     branch: main
     autoDeployTrigger: commit
-    buildCommand: npm ci --include=dev && npm run build
+    buildCommand: npm ci --include=dev && npm --prefix frontend ci && npm --prefix frontend run build
     startCommand: npm run render:start
     healthCheckPath: /health
     maxShutdownDelaySeconds: 30
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: NODE_ENV
         value: production
       - key: HOST

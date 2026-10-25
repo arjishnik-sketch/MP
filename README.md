@@ -222,14 +222,23 @@ These are the owner's current design priorities, not a permission to invent miss
 - The chart should feel like a calm, efficient station form: consistent alignment, predictable labels,
   clear day/night boundaries and no AI-generated visual clutter.
 
-## Deployment note
+## One-Click Render Deployment
 
-The included `render.yaml` Blueprint provisions the complete stack on Render:
-1. **Managed PostgreSQL** (`panchavati-demo-db`)
-2. **Fastify Backend API** (`daily-duty-panchavati-api`) with automated migrations and seed data
-3. **Next.js Frontend UI** (`daily-duty-panchavati-ui`) automatically wired to the Fastify API via `FASTIFY_URL`
+This repository includes a fully self-contained [`render.yaml`](file:///D:/AI/Projects/Panchavati/DailyDutyPanchavati-ui-rebuild/new/Latest_Repo_Deployable_and_Updated/Latest_Repo_Deployable_and_Updated/render.yaml) Blueprint that provisions the complete application with zero manual service setup:
 
-For a friend's local handoff, `npm run demo` remains the supported one-command path.
+1. In the **Render Dashboard**, select **New +** → **Blueprint**.
+2. Connect this repository (`https://github.com/arjishnik-sketch/MP.git`) and branch `main`.
+3. Click **Apply**. Render will automatically provision:
+   - **PostgreSQL 17** (`panchavati-demo-db`)
+   - **Full-Stack Web Service** (`daily-duty-panchavati`) running Next.js UI on public `PORT` and internal Fastify API with automated database readiness probing, migrations, and seeds.
+4. When deployment completes, open the provided `*.onrender.com` URL to use the application at `/dashboard`.
+
+### Production & Security Limitations
+- **Free-Tier Sleeping**: Render Free tier instances spin down after 15 minutes of inactivity; initial wakeup takes ~30–50 seconds.
+- **Authentication**: This standalone station build was engineered for local-station clerk authoring and does not include multi-tenant user authentication or login screens. When deploying to a public cloud, keep the deployment private or restrict access behind an IP/VPN boundary before populating real station operational data.
+- **Data Persistence**: Redeployments preserve clerk modifications automatically via `PANCHAVATI_KEEP_EXISTING=1`. Render Free Postgres expires after 30 days unless upgraded to a persistent tier.
+
+For a local station handoff, `npm run demo` remains the supported one-command path.
 
 Do not publish real station data or credentials without the station's explicit approval. Keep database
 backups, `.env` files and local operational exports outside version control.

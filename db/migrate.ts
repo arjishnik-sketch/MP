@@ -17,7 +17,9 @@ const migrationsDir = path.join(here, "migrations");
 // sslmode=require there breaks local trust-auth PostgreSQL ("server does not support SSL
 // connections" → the whole invariants suite fails). Render always sets DATABASE_URL, so the
 // deploy path is unchanged.
-if (process.env.DATABASE_URL) process.env.PGSSLMODE = "require";
+if (process.env.DATABASE_URL && !/@(127\.0\.0\.1|localhost)(:\d+)?\//.test(process.env.DATABASE_URL)) {
+  process.env.PGSSLMODE = "require";
+}
 
 export async function migrate(pool: pg.Pool): Promise<string[]> {
   const files = fs

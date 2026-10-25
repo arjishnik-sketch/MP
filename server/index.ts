@@ -56,8 +56,16 @@ await app.register(cors, {
   origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
 });
 
-// Health
-app.get("/health", async () => ({ ok: true, service: "panchavati" }));
+// Health: verifies service responsiveness and live PostgreSQL connectivity
+app.get("/health", async (_req, reply) => {
+  try {
+    await pool.query("SELECT 1 AS alive");
+    return { ok: true, service: "panchavati", database: "connected" };
+  } catch (err) {
+    reply.status(503);
+    return { ok: false, service: "panchavati", database: "unreachable", error: (err as Error).message };
+  }
+});
 
 // The browser asks for /favicon.ico on every page load; without a route it is a 404 in the log
 // (and in the console). It is the same emblem the header uses, so serve that.
