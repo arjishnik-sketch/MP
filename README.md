@@ -224,10 +224,12 @@ These are the owner's current design priorities, not a permission to invent miss
 
 ## Deployment note
 
-The included `render.yaml` describes the Fastify/API deployment with PostgreSQL. The Next frontend is a
-separate process and must be deployed separately with `FASTIFY_URL` pointing at the API, or both
-processes can be run together on a host that supports a supervisor. For a friend's local handoff,
-`npm run demo` is the supported one-command path.
+The included `render.yaml` Blueprint provisions the complete stack on Render:
+1. **Managed PostgreSQL** (`panchavati-demo-db`)
+2. **Fastify Backend API** (`daily-duty-panchavati-api`) with automated migrations and seed data
+3. **Next.js Frontend UI** (`daily-duty-panchavati-ui`) automatically wired to the Fastify API via `FASTIFY_URL`
+
+For a friend's local handoff, `npm run demo` remains the supported one-command path.
 
 Do not publish real station data or credentials without the station's explicit approval. Keep database
 backups, `.env` files and local operational exports outside version control.

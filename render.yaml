@@ -1,12 +1,16 @@
-# Render Blueprint for the Fastify API and its PostgreSQL database.
+# Render Blueprint for Panchavati Daily Duty Chart (Fastify API, Next.js UI & PostgreSQL).
 #
-# The Next frontend is a separate process in the local handoff. Deploy it separately and set its
-# FASTIFY_URL to this API's public origin, or run both processes on a host with a process supervisor.
-# The demo seed contains the approved station 10/09 chart. Keep this deployment private/approved when
-# using real station data.
+# Deploying this blueprint sets up:
+# 1. Managed PostgreSQL database (panchavati-demo-db)
+# 2. Fastify backend API web service (daily-duty-panchavati-api)
+# 3. Next.js frontend web service (daily-duty-panchavati-ui)
+#
+# The Next.js frontend automatically connects to the Fastify API via FASTIFY_URL.
+
 services:
+  # Fastify REST API Backend
   - type: web
-    name: daily-duty-panchavati
+    name: daily-duty-panchavati-api
     runtime: node
     plan: free
     region: oregon
@@ -24,12 +28,33 @@ services:
         value: require
       - key: PANCHAVATI_KEEP_EXISTING
         value: "1"
+      - key: CORS_ORIGIN
+        value: "*"
       - key: DATABASE_URL
         fromDatabase:
           name: panchavati-demo-db
           property: connectionString
 
+  # Next.js Frontend UI
+  - type: web
+    name: daily-duty-panchavati-ui
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FASTIFY_URL
+        fromService:
+          type: web
+          name: daily-duty-panchavati-api
+          envVarKey: RENDER_EXTERNAL_URL
+
 databases:
   - name: panchavati-demo-db
     plan: free
+    region: oregon
     postgresMajorVersion: "17"
