@@ -5,17 +5,17 @@
 
 services:
   # ----------------------------------------------------------------------------
-  # 1. Fastify Backend API
+  # Full-Stack Web Service (Fastify Backend API + Next.js UI)
   # ----------------------------------------------------------------------------
   - type: web
-    name: daily-duty-panchavati-api
+    name: daily-duty-panchavati
     runtime: node
     plan: free
     region: oregon
     branch: main
     autoDeployTrigger: commit
-    buildCommand: npm ci --include=dev
-    startCommand: npm run render:start:api
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run render:start
     healthCheckPath: /health
     maxShutdownDelaySeconds: 30
     envVars:
@@ -63,44 +63,8 @@ services:
           name: panchavati-demo-db
           property: database
 
-  # ----------------------------------------------------------------------------
-  # 2. Next.js Frontend Web Client
-  # ----------------------------------------------------------------------------
-  - type: web
-    name: daily-duty-panchavati-ui
-    runtime: node
-    plan: free
-    region: oregon
-    branch: main
-    autoDeployTrigger: commit
-    rootDir: frontend
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
-    healthCheckPath: /
-    maxShutdownDelaySeconds: 30
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10000
-      - key: TZ
-        value: Asia/Kolkata
-      - key: NODE_OPTIONS
-        value: "--max-old-space-size=512"
-      # Auto-connect to Backend Fastify API
-      - key: FASTIFY_URL
-        fromService:
-          type: web
-          name: daily-duty-panchavati-api
-          envVarKey: RENDER_EXTERNAL_URL
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: daily-duty-panchavati-api
-          envVarKey: RENDER_EXTERNAL_URL
-
 # ------------------------------------------------------------------------------
-# 3. Managed PostgreSQL Database
+# Managed PostgreSQL Database
 # ------------------------------------------------------------------------------
 databases:
   - name: panchavati-demo-db

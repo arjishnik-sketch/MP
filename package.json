@@ -13,7 +13,7 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "stop": "node scripts/stop-servers.mjs",
     "stop:all": "node scripts/stop-servers.mjs --all",
-    "build": "npm --prefix frontend run build",
+    "build": "npm --prefix frontend ci && npm --prefix frontend run build",
     "start": "node scripts/start-all.mjs",
     "start:api": "tsx server/index.ts",
     "start:all": "node scripts/start-all.mjs",

@@ -1,4 +1,4 @@
-// Purpose: Production supervisor for single-service full-stack deployment.
+// Purpose: Production supervisor for single-service full-stack deployment on Render/Docker.
 // Starts Fastify API on an internal port and Next.js frontend on the public Render PORT,
 // or runs Fastify API alone when RUN_MODE=api.
 
@@ -8,25 +8,25 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const frontendDir = path.join(root, "frontend");
 
 // 1. If DATABASE_URL is present, run fail-safe wait, migration, and seed automatically
 if (process.env.DATABASE_URL) {
   console.log("[supervisor] DATABASE_URL detected: ensuring database is ready and migrated...");
-  const waitRes = spawnSync("node", ["scripts/wait-for-db.mjs"], {
+  const waitRes = spawnSync(process.execPath, [path.join(root, "scripts", "wait-for-db.mjs")], {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
   });
   if (waitRes.status !== 0) {
     console.error("[supervisor] Database readiness check failed. Exiting.");
     process.exit(1);
   }
 
-  const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
-  const migrateRes = spawnSync(npxCmd, ["tsx", "db/migrate.ts"], {
+  const tsxCli = path.join(root, "node_modules", "tsx", "dist", "cli.mjs");
+  const migrateScript = path.join(root, "db", "migrate.ts");
+  const migrateRes = spawnSync(process.execPath, [tsxCli, migrateScript], {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
   });
   if (migrateRes.status !== 0) {
     console.error("[supervisor] Database migration failed. Exiting.");
@@ -34,15 +34,13 @@ if (process.env.DATABASE_URL) {
   }
 
   // Run reference seed and chart seed (preserving existing if PANCHAVATI_KEEP_EXISTING=1)
-  spawnSync(npxCmd, ["tsx", "db/seed-reference.ts"], {
+  spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-reference.ts")], {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
   });
-  spawnSync(npxCmd, ["tsx", "db/seed-chart-1009.ts"], {
+  spawnSync(process.execPath, [tsxCli, path.join(root, "db", "seed-chart-1009.ts")], {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
   });
 }
 
@@ -50,19 +48,52 @@ if (process.env.DATABASE_URL) {
 const runMode = (process.env.RUN_MODE || process.env.SERVICE_TYPE || "").toLowerCase();
 if (runMode === "api") {
   console.log("[supervisor] RUN_MODE=api: starting Fastify API alone.");
-  const api = spawn(
-    process.platform === "win32" ? "npx.cmd" : "npx",
-    ["tsx", "server/index.ts"],
-    {
-      cwd: root,
-      stdio: "inherit",
-      env: { ...process.env, HOST: process.env.HOST || "0.0.0.0" },
-      shell: process.platform === "win32",
-    }
-  );
+  const tsxCli = path.join(root, "node_modules", "tsx", "dist", "cli.mjs");
+  const serverScript = path.join(root, "server", "index.ts");
+  const api = spawn(process.execPath, [tsxCli, serverScript], {
+    cwd: root,
+    stdio: "inherit",
+    env: { ...process.env, HOST: process.env.HOST || "0.0.0.0" },
+  });
   api.on("exit", (code) => process.exit(code ?? 0));
 } else {
-  // 3. Full-stack single-service deployment
+  // 3. Ensure frontend dependencies and production build exist before launching Next.js
+  const frontendNodeModules = path.join(frontendDir, "node_modules");
+  const nextCli = path.join(frontendNodeModules, "next", "dist", "bin", "next");
+  const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+
+  if (!fs.existsSync(frontendNodeModules) || !fs.existsSync(nextCli)) {
+    console.log("[supervisor] frontend/node_modules missing or incomplete! Installing frontend dependencies...");
+    const installRes = spawnSync(npmCmd, ["--prefix", "frontend", "ci"], {
+      cwd: root,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
+    if (installRes.status !== 0) {
+      console.warn("[supervisor] npm ci failed in frontend; falling back to npm install...");
+      spawnSync(npmCmd, ["--prefix", "frontend", "install", "--include=dev"], {
+        cwd: root,
+        stdio: "inherit",
+        shell: process.platform === "win32",
+      });
+    }
+  }
+
+  const dotNextDir = path.join(frontendDir, ".next");
+  if (!fs.existsSync(dotNextDir)) {
+    console.log("[supervisor] frontend/.next production build not found! Building frontend now...");
+    const buildRes = spawnSync(npmCmd, ["--prefix", "frontend", "run", "build"], {
+      cwd: root,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
+    if (buildRes.status !== 0) {
+      console.error("[supervisor] Frontend build failed!");
+      process.exit(1);
+    }
+  }
+
+  // 4. Full-stack single-service deployment ports
   const publicPort = Number(process.env.PORT) || 3000;
   // If public port is 3100, use 3101 for Fastify internal port to avoid collision
   const internalApiPort = publicPort === 3100 ? 3101 : 3100;
@@ -77,39 +108,46 @@ if (runMode === "api") {
   const children = [];
 
   // Start Fastify API on internalApiPort
-  const api = spawn(
-    process.platform === "win32" ? "npx.cmd" : "npx",
-    ["tsx", "server/index.ts"],
-    {
-      cwd: root,
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        PORT: String(internalApiPort),
-        HOST: "0.0.0.0",
-        FASTIFY_INTERNAL: "1",
-      },
-      shell: process.platform === "win32",
-    }
-  );
+  const tsxCli = path.join(root, "node_modules", "tsx", "dist", "cli.mjs");
+  const serverScript = path.join(root, "server", "index.ts");
+  const api = spawn(process.execPath, [tsxCli, serverScript], {
+    cwd: root,
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      PORT: String(internalApiPort),
+      HOST: "0.0.0.0",
+      FASTIFY_INTERNAL: "1",
+    },
+  });
   children.push(api);
 
   // Start Next.js frontend on publicPort
-  const frontend = spawn(
-    process.platform === "win32" ? "npm.cmd" : "npm",
-    ["--prefix", "frontend", "run", "start"],
-    {
-      cwd: root,
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        PORT: String(publicPort),
-        FASTIFY_URL: fastifyUrl,
-        NEXT_PUBLIC_API_URL: fastifyUrl,
-      },
-      shell: process.platform === "win32",
-    }
-  );
+  // Use direct Node executable pointing to Next.js CLI with augmented PATH and cwd
+  const frontendEnv = {
+    ...process.env,
+    PORT: String(publicPort),
+    FASTIFY_URL: fastifyUrl,
+    NEXT_PUBLIC_API_URL: fastifyUrl,
+    PATH: [
+      path.join(frontendDir, "node_modules", ".bin"),
+      path.join(root, "node_modules", ".bin"),
+      process.env.PATH || "",
+    ].join(path.delimiter),
+  };
+
+  const frontend = fs.existsSync(nextCli)
+    ? spawn(process.execPath, [nextCli, "start", "-p", String(publicPort), "-H", "0.0.0.0"], {
+        cwd: frontendDir,
+        stdio: "inherit",
+        env: frontendEnv,
+      })
+    : spawn(npmCmd, ["--prefix", "frontend", "run", "start", "--", "-p", String(publicPort), "-H", "0.0.0.0"], {
+        cwd: frontendDir,
+        stdio: "inherit",
+        env: frontendEnv,
+        shell: process.platform === "win32",
+      });
   children.push(frontend);
 
   let closing = false;
