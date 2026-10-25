@@ -20,6 +20,8 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${fastifyUrl}/api/:path*` },
+      { source: "/health", destination: `${fastifyUrl}/health` },
+      { source: "/assets/:path*", destination: `${fastifyUrl}/assets/:path*` },
     ];
   },
 };

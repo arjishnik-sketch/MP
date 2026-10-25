@@ -37,9 +37,10 @@ import { registerRegisterRoutes } from "./registers.js";
 // PORT may be present-but-empty in some shells (Number("")===0 → random port);
 // fall back to the documented 3100 unless a real port number is provided.
 const port = Number(process.env.PORT) || 3100;
-// Local default is loopback — the duty chart is not reachable from the LAN. A demo deployment
-// sets HOST=0.0.0.0 because the platform proxies into the container from outside.
-const host = process.env.HOST || "127.0.0.1";
+// Bind to 0.0.0.0 so containerized / cloud deployment platforms (such as Render)
+// can detect open ports and route incoming traffic to the container.
+// Can be overridden via HOST environment variable if loopback binding is explicitly required.
+const host = process.env.HOST || "0.0.0.0";
 const pool = makePool(DEV_DB);
 
 // Logging (user question 2026-10-13: “Whenever I npm run dev … this outputs, is this normal?”).

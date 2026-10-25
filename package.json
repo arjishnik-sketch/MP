@@ -13,7 +13,10 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "stop": "node scripts/stop-servers.mjs",
     "stop:all": "node scripts/stop-servers.mjs --all",
-    "start": "tsx server/index.ts",
+    "build": "npm --prefix frontend run build",
+    "start": "node scripts/start-all.mjs",
+    "start:api": "tsx server/index.ts",
+    "start:all": "node scripts/start-all.mjs",
     "db:create": "node scripts/create-dbs.mjs",
     "db:migrate": "tsx db/migrate.ts",
     "db:seed:reference": "tsx db/seed-reference.ts",
@@ -21,7 +24,8 @@
     "db:seed": "npm run db:seed:reference && npm run db:seed:chart",
     "db:setup": "npm run db:create && npm run db:migrate && npm run db:seed",
     "db:wait": "node scripts/wait-for-db.mjs",
-    "render:start": "npm run db:wait && npm run db:migrate && npm run db:seed && npm start",
+    "render:start:api": "npm run db:wait && npm run db:migrate && npm run db:seed && npm run start:api",
+    "render:start": "npm run db:wait && npm run db:migrate && npm run db:seed && npm run start:all",
     "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {

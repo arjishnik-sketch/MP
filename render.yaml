@@ -15,7 +15,7 @@ services:
     branch: main
     autoDeployTrigger: commit
     buildCommand: npm ci --include=dev
-    startCommand: npm run render:start
+    startCommand: npm run render:start:api
     healthCheckPath: /health
     maxShutdownDelaySeconds: 30
     envVars:
