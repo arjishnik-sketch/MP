@@ -1,0 +1,174 @@
+/*
+ * Purpose: Left-aligned management tables and independently sized filter rows.
+ * Current role: Preserve native column widths and internal resize affordances in every consumer.
+ * Last meaningful change: 2026-10-18 — trailing resizer handle removed; table remains left-aligned.
+ * Constraint: Width persistence/autofit remain in ManagementTable, not CSS layout.
+ */
+.surface {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+  color: var(--ink);
+}
+
+.toolbar {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.toolbarMain {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+}
+
+.toolbarMain > :global(.form-field) {
+  min-width: 180px;
+  flex: 1 1 240px;
+}
+
+.toolbarMain > :global(.staff-search-field) {
+  flex-basis: 300px;
+}
+
+.toolbarMain > :global(.staff-filter-field) {
+  min-width: 140px;
+  flex: 0 1 170px;
+}
+
+.toolbarMain > :global(.management-table-search-field) {
+  min-width: 180px;
+  flex: 1 1 210px;
+}
+
+.toolbarMain > :global(.management-table-filter-field) {
+  min-width: 120px;
+  flex: 0 1 140px;
+}
+
+.toolbarMain > :global(.management-table-date-field) {
+  min-width: 140px;
+  flex: 0 1 148px;
+}
+
+.toolbarActions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.count {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  padding-bottom: 8px;
+  color: var(--muted);
+  font-size: .875rem;
+  white-space: nowrap;
+}
+
+.wrap {
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.table {
+  min-width: 0;
+  margin-inline: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: left;
+  font-size: .875rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--line-soft);
+  padding: 9px 12px;
+  color: var(--ink);
+  vertical-align: middle;
+  text-align: left;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.table th {
+  position: relative;
+  background: var(--band);
+  font-weight: 600;
+  white-space: normal;
+}
+
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover { background: var(--surface-muted); }
+.table .serial { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table :global(.management-table-code) { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+
+.table :global(.row-action) {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 5px 8px;
+  color: var(--navy);
+  font-size: .875rem;
+  text-decoration: none;
+}
+
+.resizing,
+.resizing * { user-select: none; cursor: col-resize; }
+
+.resizer {
+  position: absolute;
+  inset-block: 0;
+  right: -6px;
+  z-index: var(--layer-cell);
+  width: 12px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  appearance: none;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.resizer::after {
+  position: absolute;
+  inset-block: 5px;
+  right: 5px;
+  width: 1px;
+  background: var(--line);
+  content: "";
+  pointer-events: none;
+}
+
+.resizer:hover::after,
+.resizer:focus-visible::after,
+.activeResizer::after { width: 2px; background: var(--navy); }
+.resizer:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.table .empty { padding: 22px 14px; color: var(--muted); text-align: left !important; }
+
+@media (max-width: 1000px) {
+  .toolbar { align-items: stretch; flex-direction: column; }
+}
+
+@media (max-width: 560px) {
+  .toolbarMain > :global(.form-field) { min-width: 0; flex: 1 1 100%; }
+  .count { padding-bottom: 0; }
+}

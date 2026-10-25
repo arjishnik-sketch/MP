@@ -1,0 +1,50 @@
+{
+  "name": "panchavati-daily-duty",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Panchavati Police Station daily duty chart — clean rebuild (P0: database foundation)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch server/index.ts",
+    "demo": "node scripts/dev-all.mjs",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "stop": "node scripts/stop-servers.mjs",
+    "stop:all": "node scripts/stop-servers.mjs --all",
+    "start": "tsx server/index.ts",
+    "db:create": "node scripts/create-dbs.mjs",
+    "db:migrate": "tsx db/migrate.ts",
+    "db:seed:reference": "tsx db/seed-reference.ts",
+    "db:seed:chart": "tsx db/seed-chart-1009.ts",
+    "db:seed": "npm run db:seed:reference && npm run db:seed:chart",
+    "db:setup": "npm run db:create && npm run db:migrate && npm run db:seed",
+    "doctor": "node scripts/doctor.mjs"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.1",
+    "@indic-transliteration/sanscript": "^1.3.3",
+    "@tanstack/react-table": "^9.3.1",
+    "fastify": "^5.12.5",
+    "pg": "^8.13.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.8"
+  },
+  "intent": {
+    "skills": [
+      "*"
+    ]
+  }
+}

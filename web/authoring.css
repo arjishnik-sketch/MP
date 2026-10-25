@@ -1,0 +1,2330 @@
+/* ============================================================================
+   Panchavati Daily Duty Chart — authoring UI stylesheet (production)
+   Purpose: edit-mode affordances, staff picker flyer, abbreviation tooltips,
+     add-box controls, toasts — everything that is NOT the frozen visual baseline.
+   Current role: served by the Fastify app (GET /authoring.css) and linked by the
+     server-rendered chart page; design/compv3.css remains the approved reference.
+   Last meaningful change: 2026-10-09 — created by MOVING the mode-edit/flyer
+     styles out of compv3.css (whose header always claimed they were removed),
+     scoping them to real slots, and adding add-box/abbr/toast styles.
+   Constraint/dependency: every rule here is killed under @media print; baseline
+     compv3.css is human-owned — authoring styles change HERE, never there.
+   ============================================================================ */
+
+/* ---- app header (Arjish AppNav grammar ported to server-rendered HTML) -------
+   Screen-only chrome: the whole bar is `.no-print`, so the printed sheets keep their own
+   head. Structure = emblem + station + product title on the left, date control + status +
+   actions + signed-in clerk on the right. */
+.toolbar#appbar {
+  background: #0e1e38;
+  border-bottom: 1px solid #1b2e4f;
+  padding: 0 16px;
+  min-height: 56px;
+  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+#appbar .ab-l {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+#appbar .ab-logo {
+  height: 34px;
+  width: auto;
+  border-radius: 4px;
+  background: #fff;
+  padding: 2px;
+  flex: none;
+}
+
+#appbar .ab-st {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+#appbar .ab-st b {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+#appbar .ab-st span {
+  font-size: 10.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+#appbar .ab-sep {
+  width: 1px;
+  height: 26px;
+  background: rgba(255, 255, 255, .2);
+}
+
+#appbar .ab-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: 14px;
+}
+
+#appbar .ab-nav a,
+#appbar .ab-nav .planned {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 8px;
+  color: #b9c8dd;
+  border-bottom: 2px solid transparent;
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#appbar .ab-nav a.active {
+  color: #fff;
+  border-bottom-color: #d2a85b;
+}
+
+#appbar .ab-nav .planned {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+#appbar .ab-nav small {
+  font-size: 8px;
+  color: #d2a85b;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+#appbar .ab-r {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+#appbar .ab-datewrap {
+  position: relative;
+  position: relative;
+}
+
+/* compact-v5: the date selector sits on the chart toolbar (second bar), not in the identity
+   header. Layout is shared; colours follow the bar it sits on so it stays legible. */
+.ab-datebtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.chart-toolbar .ab-datebtn {
+  background: #fff;
+  border: 1px solid #b6c4d4;
+  color: var(--navy);
+}
+
+.chart-toolbar .ab-datebtn:hover {
+  background: #f0f7ff;
+  border-color: var(--navy);
+}
+
+#appbar .ab-datebtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid #33456b;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-height: 34px;
+}
+
+/* 10. Date selector — Kushal's reference picker (user 2026-10-13: “copy the style and behaviour
+   from there as it is”): a two-line control (bold date over the weekday) with a calendar glyph
+   and a chevron, highlighted with an आज chip when the chart is today, opening a searchable
+   card grouped आगामी → अलीकडील ७ दिवस → ऐतिहासिक व डेमो तारखा. Rows carry the weekday and an
+   availability dot; a date with no chart is muted and inert. */
+.ab-datebtn .cal {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  flex: none;
+  opacity: .85;
+}
+
+.chart-toolbar .ab-datebtn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  gap: 8px;
+}
+
+.chart-toolbar .ab-datebtn.today {
+  background: #eaf2fe;
+  border-color: #5ea0ec;
+  box-shadow: 0 0 0 2px rgba(94, 160, 236, .22);
+}
+
+.ab-datebtn .dl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.ab-datebtn .dl .w {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.chart-toolbar .ab-datebtn.today .dl .d {
+  color: #17427f;
+}
+
+.ab-datebtn .today-chip,
+.ab-datemenu .today-chip {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: #1d63c6;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.ab-datebtn .today-chip {
+  align-self: center;
+}
+
+.ab-datemenu {
+  width: 258px;
+  border-radius: 12px;
+  padding: 7px;
+}
+
+.ab-datemenu .dm-search {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 5px;
+  padding: 4px 7px;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.ab-datemenu .dm-search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: #0f172a;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ab-datemenu .dm-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* Advanced search (WIP) at the right end of the date menu's search row: icon only, honestly badged
+   — it opens the same Coming-Soon entry the navbar's “ऐतिहासिक शोध” leaf opens, never a half-usable
+   screen of its own. */
+.ab-datemenu .dm-adv {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.ab-datemenu .dm-adv:hover {
+  border-color: var(--navy-3);
+  color: var(--navy);
+  background: #f1f5f9;
+}
+
+.ab-datemenu .dm-adv .wip-dot {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.ab-datemenu .dm-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ab-datemenu .dm-item {
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.ab-datemenu .dm-item .ddate {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-datemenu .dm-item .dmeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.ab-datemenu .dm-item.today:not(.cur) {
+  color: #047857;
+}
+
+.ab-datemenu .dm-item.cur .dmeta,
+.ab-datemenu .dm-item.cur .wd {
+  color: #cbd5e1;
+}
+
+.ab-datemenu .dm-item.off {
+  color: #b6c2d1;
+  cursor: default;
+  font-weight: 500;
+}
+
+.ab-datemenu .dm-item.off:hover {
+  background: transparent;
+}
+
+.ab-datemenu .dm-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  display: inline-block;
+}
+
+.ab-datemenu .dm-item.cur .dot {
+  background: #93c5fd;
+}
+
+.ab-datemenu .dm-item .tom-chip {
+  font-size: 9px;
+  font-weight: 800;
+  color: #4338ca;
+  background: #e0e7ff;
+  border: 1px solid #a5b4fc;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.ab-datemenu .dm-item .nodot {
+  font-size: 9px;
+  color: #b6c2d1;
+}
+
+.ab-datebtn .d {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ab-datebtn .w {
+  color: #93a8c8;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.ab-datebtn .cv {
+  color: #93a8c8;
+  font-size: 10px;
+}
+
+.ab-datebtn:hover {
+  background: rgba(255, 255, 255, .12);
+}
+
+/* ONE scroll region, not two (user 2026-10-13: “remove that double scroll from date selector”).
+   The panel used to scroll AND host a scrolling list, so a scrollbar appeared inside a scrollbar.
+   The panel is now a clipped column: its own scroll is gone, the search box stays pinned at the
+   top, and the LIST is the only thing that scrolls. */
+.ab-datemenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 70;
+  min-width: 230px;
+  max-height: min(72vh, 420px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(2, 8, 23, .35);
+  padding: 6px;
+}
+
+/* The collapsed menu MUST be gone: `.ab-datemenu` sets display:flex, which overrode the UA's
+   `[hidden]{display:none}` and left a 13px slice of the menu (its search row) permanently
+   visible under the date button — and a second click therefore looked like it did nothing
+   (hidden was set, the slice stayed). The attribute now wins outright. */
+.ab-datemenu[hidden] {
+  display: none !important;
+}
+
+.ab-datemenu .dm-head {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 4px 8px 6px;
+}
+
+.ab-datemenu .dm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ab-datemenu .dm-item:hover,
+.ab-datemenu .dm-item:focus {
+  background: #eef4fb;
+  outline: none;
+}
+
+.ab-datemenu .dm-item.cur {
+  background: #0e1e38;
+  color: #fff;
+}
+
+.ab-datemenu .dm-item .st {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: #64748b;
+}
+
+.ab-datemenu .dm-item.cur .st {
+  color: #cbd5e1;
+}
+
+#appbar .ab-user {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid #33456b;
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  max-width: 38ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#appbar .ab-user:hover {
+  background: rgba(255, 255, 255, .12);
+}
+
+#appbar .ab-user.on {
+  background: #14532d;
+  border-color: #166534;
+  color: #dcfce7;
+}
+
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 45px;
+  padding: 7px 16px;
+  background: #f7f9fc;
+  border-bottom: 1px solid #cbd5e1;
+  color: #173b65;
+}
+
+.chart-toolbar .ct-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chart-toolbar .ct-title strong {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chart-toolbar .ct-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+}
+
+.chart-toolbar button {
+  padding: 5px 9px;
+  border: 1px solid #b6c4d4;
+  border-radius: 4px;
+  background: #fff;
+  color: #173b65;
+  font: inherit;
+  font-size: 11px;
+}
+
+.chart-toolbar button:hover {
+  background: #edf3fa;
+}
+
+.chart-toolbar button.finalize {
+  background: #176b43;
+  border-color: #176b43;
+  color: #fff;
+}
+
+.chart-toolbar .lc {
+  padding: 4px 7px;
+}
+
+/* Compact-v4 printed identity: four information groups share one horizontal line. */
+.page .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 31px;
+  padding: 4px 8px;
+}
+
+.page .head .hc {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.page .head .h1,
+.page .head .h2,
+.page .head .h3 {
+  display: inline;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.page .head .h1 {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.page .head .h2 {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.page .head .h3 {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.page .head .hr {
+  flex: none;
+}
+
+@media screen and (max-width:1025px) {
+  #appbar {
+    flex-wrap: wrap;
+    padding: 6px 12px;
+  }
+
+  #appbar .ab-nav {
+    margin-left: 0;
+    width: 100%;
+    overflow-x: auto;
+    order: 3;
+  }
+
+  #appbar .ab-st-2,
+  #appbar .ab-sep {
+    display: none;
+  }
+
+  .chart-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .page .head .hc {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+/* ---- edit-mode slot affordances (hover/focus outline + pencil, real slots) --- */
+body.mode-edit .dt td.slot {
+  cursor: pointer;
+  transition: background .15s ease, outline .15s ease;
+}
+
+body.mode-edit .dt td.slot:hover {
+  outline: 1px dashed var(--navy-3);
+  background: #f0f7ff;
+  border-radius: 2px;
+}
+
+body.mode-edit .dt td.slot:focus {
+  outline: 2px solid #2563eb;
+  background: #eff6ff;
+}
+
+/* Hover must not change the geometry: injecting the ✎ glyph re-flowed the cell text and made
+   the whole row jump/flicker on every hover. The affordance is now pure outline + tint. */
+body.mode-edit .dt td.slot:hover {
+  background-image: none;
+}
+
+body.mode-edit .dt td.slot {
+  outline-offset: -1px;
+}
+
+/* ---- editable display names (section / table / column / left-row titles) ------
+   Every rename-able name carries data-label + data-default from the renderer. Edit mode
+   shows the SAME effect as slots: dashed outline + tint, geometry identical hovered or
+   not — no content injection on hover (that is what made cells flicker/reflow before). */
+body.mode-edit [data-label] {
+  cursor: text;
+  border-radius: 2px;
+}
+
+body.mode-edit [data-label]:hover {
+  outline: 1px dashed var(--navy-3);
+  outline-offset: 1px;
+  background: #f0f7ff;
+}
+
+body.mode-edit [data-label]:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+  background: #eff6ff;
+}
+
+/* ---- chowki band: keep state lines whole (chart layout correction) ----------
+   These apply on screen AND in print (unlike the edit chrome above/below). The baseline
+   wraps `.fx` mid-phrase ("चार्ज →" then an orphan word on the next line); the state words
+   stay together here and only the destination phrase wraps, so nothing looks broken and
+   nothing spills out of its column. */
+.fx {
+  text-wrap: pretty;
+}
+
+.fx .lb,
+.fx .st {
+  white-space: nowrap;
+}
+
+.fx .dst {
+  overflow-wrap: break-word;
+}
+
+.sub-col-title span {
+  text-wrap: pretty;
+}
+
+.ch-head .of {
+  text-wrap: pretty;
+}
+
+.dt td,
+.dt th {
+  text-wrap: pretty;
+}
+
+/* ---- contextual add-box controls (edit mode only; never printed) ------------ */
+.add-box {
+  display: none;
+}
+
+body.mode-edit .add-box {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1.5px dashed var(--navy-3);
+  border-radius: 4px;
+  background: #f7fafd;
+  color: var(--navy);
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+body.mode-edit .add-box:hover:not(:disabled) {
+  background: #eaf0f8;
+  border-color: var(--navy);
+}
+
+body.mode-edit .add-box:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  border-color: var(--line);
+  color: var(--ink-faint);
+}
+
+body.mode-edit .add-box:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+/* ---- compact-v5 header: grouped nav, language toggle, bar placements -------------- */
+/* One UI language at a time (never both): the markup carries both, CSS shows one. The chart
+   itself is police data and always prints Marathi regardless of the chrome language. */
+[data-lang="en"] {
+  display: none;
+}
+
+body.lang-en [data-lang="en"] {
+  display: inline;
+}
+
+body.lang-en [data-lang="mr"] {
+  display: none;
+}
+
+.ab-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ab-group {
+  position: relative;
+}
+
+.ab-gbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #cbd5e1;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.ab-gbtn:hover {
+  color: #fff;
+}
+
+.ab-gbtn.active {
+  color: #fff;
+  border-bottom-color: #d2a85b;
+}
+
+.ab-gbtn small,
+.ab-menu small {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #24314f;
+  color: #9fb3d1;
+  border: 1px solid #33456b;
+}
+
+.ab-gbtn small.wip {
+  color: #e8d9a8;
+  border-color: #6b5a2a;
+  background: #2c2716;
+}
+
+.ab-gbtn .cv {
+  font-size: 9px;
+  opacity: .8;
+}
+
+/* dropdown: opens on hover, on focus (keyboard) and when JS marks the group open */
+.ab-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 80;
+  min-width: 290px;
+  padding: 5px;
+  background: #0f2140;
+  border: 1px solid #33456b;
+  border-radius: 7px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .35);
+}
+
+/* User correction 2026-10-13: menus open on CLICK only (never on hover/focus), and clicking
+   the group again closes it — hover-open menus were hard to use on a daily-driver screen. */
+.ab-group.open .ab-menu {
+  display: block;
+}
+
+.ab-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-radius: 5px;
+  color: #dbe4f0;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ab-menu a:hover,
+.ab-menu a:focus-visible {
+  background: #1b2e52;
+  color: #fff;
+}
+
+.ab-menu a.ab-live {
+  border-top: 1px solid #24314f;
+  margin-top: 4px;
+  color: #cfe0f7;
+}
+
+/* language toggle: मराठी | EN */
+.ab-lang {
+  display: inline-flex;
+  border: 1px solid #33456b;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.ab-lang button {
+  background: none;
+  border: 0;
+  color: #cbd5e1;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.ab-lang button + button {
+  border-left: 1px solid #33456b;
+}
+
+.ab-lang button.on {
+  background: #d2a85b;
+  color: #10203c;
+}
+
+/* the date selector lives on the chart's own bar (second bar), not in the identity header */
+/* Bug fix 2026-10-13: the wrapper had no `position`, so the absolutely positioned menu
+   anchored to the (sticky) toolbar and appeared detached at the bar's bottom-left. The
+   wrapper is the anchor, and the menu hangs from the button's right edge so it never
+   overflows the viewport. */
+.chart-toolbar .ct-actions .ab-datewrap {
+  position: relative;
+  margin-right: 4px;
+}
+
+.chart-toolbar .ab-datemenu {
+  /* the date button sits at the toolbar's left edge — hang the menu from ITS left, so a
+     right-anchored menu can never be pushed off-screen (left: -47px was measured). */
+  left: 0;
+  right: auto;
+}
+
+.ab-datemenu .dm-none {
+  padding: 5px 8px 7px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ---- compact-v5: inline add tile + block removal (edit mode only) --------------- */
+/* The officer band's add control is a TILE in the same row as the boxes (beside the last one),
+   not a full-width block below them — user correction 2026-10-13. In print the tile is hidden
+   and the band returns to its four equal columns (see the print block at the end). */
+body.mode-edit .grid.g-off.fit {
+  grid-template-columns: repeat(4, 1fr) 124px;
+}
+
+body.mode-edit .add-box-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0;
+  min-height: 54px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ✕ on a clerk-added officer box and on a chowki block — edit mode only, never printed. */
+.box-del {
+  display: none;
+}
+
+body.mode-edit .box-del {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  height: 17px;
+  line-height: 15px;
+  border: 1px solid #fecdd3;
+  border-radius: 3px;
+  background: #fff;
+  color: #b42318;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.mode-edit .ch-head {
+  position: relative;
+}
+
+body.mode-edit .ch-head .box-del {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  margin-left: 0;
+}
+
+body.mode-edit .box-del:hover {
+  background: #fff1f2;
+  border-color: #f87171;
+}
+
+/* compact-v5 lane packing: the command sheet carries THREE lanes (day │ night │ office).
+   Overrides the frozen baseline's 1fr 1fr without editing it; narrower screens keep the
+   baseline's two-column behaviour. */
+.grid.g-core {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1120px) {
+  .grid.g-core {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.mode-edit .grid.g-off.fit {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* the office register left the court sheet, so that register is now full width */
+.grid.g-desk.alone {
+  grid-template-columns: 1fr;
+}
+
+/* ---- abbreviation tooltip (hover AND keyboard focus; preview only) ----------
+   The full form is shown by #abbr-tip, positioned by chart-authoring.js in a fixed layer above
+   the token: a CSS ::after bubble is clipped by the block's own overflow (user 2026-10-13:
+   “if the parent box ends, inside abbreviation dropdown cuts down”). No dotted underline. */
+abbr.abbr {
+  font-style: normal;
+  text-decoration: none;
+  cursor: help;
+}
+
+abbr.abbr:focus {
+  outline: none;
+}
+
+/* ---- 3-option staff picker flyer (moved from compv3.css, 502-round) --------- */
+.flyer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, .45);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flyer-overlay[hidden] {
+  display: none !important;
+}
+
+.flyer-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .25);
+  width: min(440px, 94vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.flyer-header {
+  padding: 12px 16px;
+  background: #0b3568;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flyer-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.flyer-close {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.flyer-close:hover {
+  color: #fff;
+}
+
+.flyer-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flyer-opt {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 9px 11px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.flyer-opt:hover {
+  border-color: #2c5282;
+  background: #f0f7ff;
+}
+
+.flyer-opt.disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.flyer-opt h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b3568;
+  margin-bottom: 2px;
+}
+
+.flyer-opt p {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.flyer-search {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.flyer-list {
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin-top: 6px;
+  background: #fff;
+}
+
+.flyer-item {
+  padding: 5px 8px;
+  font-size: 11.5px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.flyer-item:hover {
+  background: #e0ecf8;
+  color: #0b3568;
+  font-weight: 600;
+}
+
+.flyer-item .sg {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #15803d;
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0 5px;
+  vertical-align: 1px;
+}
+
+.flyer-item.sg-top {
+  background: #f0fdf4;
+}
+
+.flyer-mini-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.flyer-mini-form input,
+.flyer-mini-form select {
+  padding: 5px 8px;
+  font-size: 11.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+.flyer-btn-submit {
+  background: #0b3568;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.flyer-btn-submit:hover {
+  background: #1e3a5f;
+}
+
+.flyer-btn-ghost {
+  background: #fff;
+  color: #0b3568;
+  border: 1px solid #cbd5e1;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.flyer-btn-ghost:hover {
+  background: #f0f7ff;
+  border-color: #2c5282;
+}
+
+.flyer-btn-danger {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #fecdd3;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.flyer-btn-danger:hover {
+  background: #fff1f2;
+}
+
+.flyer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.flyer-slot-info {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* rename flyer: scope choice (this element only / everywhere with this default name) */
+.rn-scope {
+  font-size: 11.5px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #334155;
+  margin: 3px 0;
+  cursor: pointer;
+}
+
+.rn-scope input {
+  margin: 0;
+}
+
+/* ---- toast (success/error feedback, no-print) ------------------------------ */
+.toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: #0f172a;
+  color: #fff;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+  max-width: 90vw;
+}
+
+.toast.ok {
+  background: #14532d;
+}
+
+.toast.err {
+  background: #7f1d1d;
+}
+
+/* ============================================================================
+   Compact-v5 density pass (2026-10-13) — every rule here is tied to a measurement.
+   D2/D3: grid items (office/court registers, chowki blocks, officer boxes) must grow to their
+   own content instead of being stretched to the tallest item in their row. Measured before the
+   fix: office register box 757px for 291px of rows (465px false blank); single-row chowki blocks
+   stretched to 217/238px boxes. Content-only change: no row is hidden, moved or reordered.
+   ========================================================================== */
+.grid.g-desk,
+.grid.g-chowki,
+.grid.g-off,
+.grid.g-core,
+.grid.g4 {
+  align-items: start;
+}
+
+/* D4a: timing is source information, not a UI badge. The blue pill printed on every person's
+   window and on each chowki in-charge window read as duration chips and was rejected by the
+   station. Plain text in the row's own tone; the value itself is unchanged and still prints. */
+.ch-head .of .tm,
+.dt td .duty-time {
+  font-weight: 600;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* D4b: the operating-state line (बंद / चार्ज / मार्शल:) must carry its meaning in WORDS. The red
+   tone on every chowki block was the "contrasting colour" complaint. Slate ink with the state
+   word bold keeps बंद/चार्ज/मार्शल unmistakable without colour being the signal. */
+.fx,
+.fx.mrsh {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.fx .lb,
+.fx .sl {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* D4c: card fatigue. Each block was a rounded card whose border doubled with the heading-band
+   rule and with a dotted separator under EVERY row, which made each person look like its own
+   little card. Keep one square frame per block, one rule under the heading, and row rules only
+   between groups. Decoration only — nothing is dropped, truncated or reordered. */
+.page .blk {
+  border: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.page .blk .body .dt tr:not(.g) > td {
+  border-top: 0;
+}
+
+.page .blk .body .dt tr.g > th,
+.page .blk .body .dt tr.g > td {
+  border-top: 1px solid var(--line-soft);
+}
+
+/* A row that starts directly under a column/table heading keeps NO top rule: the heading band
+   already draws one (`.blk > .bh { border-bottom }`, `.sub-col-title { border-bottom }`), and the
+   two together read as a double border (user 2026-10-13: “remove its upper border … this will get
+   rid of that double border look”). The rule above is more specific than the baseline
+   `.dt tr.g:first-child`, so the exception has to be repeated here. */
+.page .blk .body .dt tr.g:first-child > th,
+.page .blk .body .dt tr.g:first-child > td {
+  border-top: 0;
+}
+
+/* ---- print density: composite sheets whose real content exceeds one A4 -----
+   The mock's type scale fits a page when its sample data is small; the 10/09 source
+   carries ~2× that volume on the command band (page 1) and the leave/court page. Those
+   two sheets get `.page.dense` from the renderer, which tightens row padding and type
+   in PRINT only (screen keeps the mock's generous scale). Values are never dropped,
+   truncated or reordered — only row metrics change, and no size goes below 9.5px. */
+@media print {
+  .page.dense .head {
+    padding: 0 0 2px;
+    margin-bottom: 3px;
+  }
+
+  .page.dense .head .hc .h1 {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .page.dense .head .hc .h2 {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .page.dense .head .hc .h3 {
+    font-size: 10px;
+  }
+
+  .page.dense .sec {
+    margin: 5px 0 2px;
+  }
+
+  .page.dense .sec h2 {
+    font-size: 11px;
+  }
+
+  .page.dense .grid {
+    gap: 4px;
+  }
+
+  .page.dense .p1-lower {
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .page.dense .sr-pi-card {
+    margin: 0 auto 4px;
+  }
+
+  .page.dense .sr-pi-body {
+    padding: 3px 10px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .page.dense .blk>.bh {
+    padding: 2px 6px;
+  }
+
+  .page.dense .blk .bh .nm {
+    font-size: 11px;
+  }
+
+  .page.dense .blk .body {
+    padding: 3px 6px;
+    gap: 1.5px;
+  }
+
+  .page.dense .dt {
+    font-size: 9.5px;
+  }
+
+  .page.dense .dt th {
+    font-size: 9.5px;
+    padding: 1px 5px 1px 0;
+  }
+
+  .page.dense .dt td {
+    padding: 1px 0;
+  }
+
+  .page.dense .core .dt th {
+    padding-right: 10px;
+  }
+
+  .page.dense .p {
+    font-size: 10px;
+    padding: 1px 0;
+  }
+
+  .page.dense .p .r {
+    font-size: 9.5px;
+  }
+
+  .page.dense .g-off .blk .body .dt {
+    font-size: 9.5px;
+  }
+
+  /* Page 1 has the command hierarchy plus two paired core tables. Tighten only its
+     internal block metrics; other dense sheets retain the normal readable density. */
+  .page.command .g-off,
+  .page.command .g-core {
+    gap: 3px;
+  }
+
+  .page.command .g-off .blk .body,
+  .page.command .g-core .blk .body {
+    padding: 2px 5px;
+    gap: 1px;
+  }
+
+  .page.command .g-off .dt td,
+  .page.command .g-off .dt th,
+  .page.command .g-core .dt td,
+  .page.command .g-core .dt th {
+    line-height: 1.08;
+  }
+
+  /* Sheet 2 (compact-v5): the six-chowki band (field sheet). Measured overflow before this block:
+     800px vs 775px — the blocks keep their rows, only padding/leading tighten, and nothing goes
+     below 9.5px. The गस्त/स्कॅनिंग schedule that used to ride along at the bottom of this sheet
+     now lives on sheet 3: with the source's own session cards plus the folded hourly strip it
+     measured 810px here (2026-10-13 print:audit) once the chowki cells became equal-height, and a
+     35px-tight sheet breaks again the moment either section grows. */
+  .page.chowki .sec {
+    margin: 3px 0 2px;
+  }
+
+  .page.chowki .sec h2 {
+    font-size: 10.5px;
+  }
+
+  .page.chowki .grid {
+    gap: 5px;
+  }
+
+  .page.chowki .tbl th,
+  .page.chowki .tbl td {
+    font-size: 9.5px;
+    padding: 1px 5px;
+  }
+
+  /* Sheet 5 (compact-v5): the 28 source notices plus the patrol/scan schedule now share one
+     sheet instead of each owning one. Measured overflow before this block: 837px vs 775px. The
+     type never drops below 9.5px and no notice line is dropped or truncated. */
+  .page.notices .sec {
+    margin: 3px 0 2px;
+  }
+
+  .page.notices .sec h2 {
+    font-size: 10.5px;
+  }
+
+  .page.notices .blk>.bh {
+    padding: 1px 6px;
+  }
+
+  .page.notices .blk .bh .nm {
+    font-size: 10.5px;
+  }
+
+  .page.notices .blk .body {
+    padding: 2px 6px;
+    gap: 1px;
+  }
+
+  .page.notices .p {
+    font-size: 10px;
+    padding: 0.5px 0;
+  }
+
+  .page.notices .tbl th,
+  .page.notices .tbl td {
+    font-size: 9.5px;
+    padding: 1px 5px;
+  }
+
+  .page.notices .grid {
+    gap: 5px;
+  }
+
+  /* row metrics: 20–36 source rows per block only fit a sheet when a row is ~15px.
+     Values wrap, they are never truncated. */
+  .page.dense .dt td,
+  .page.dense .p,
+  .page.dense .dt th {
+    line-height: 1.15;
+  }
+
+  /* Sheet 3 hosts the court/special cards and, since the chowki sheet could no longer hold it,
+     the गस्त व स्कॅनिंग schedule (source session cards + the hourly strip folded into three
+     sub-columns). Same rows in the same order, only leading/padding tighten. */
+  .page.dense .grid.g-scan-sessions,
+  .page.dense .grid.g-scan-hours {
+    gap: 5px;
+  }
+
+  .page.dense .grid.g-scan-sessions .tbl th,
+  .page.dense .grid.g-scan-sessions .tbl td,
+  .page.dense .grid.g-scan-hours .tbl th,
+  .page.dense .grid.g-scan-hours .tbl td {
+    font-size: 9.5px;
+    padding: 1px 5px;
+    line-height: 1.15;
+  }
+
+  /* leave/court lists: the mock's 4 columns leave whole grid rows half empty when one
+     list (साप्ताहिक सुट्टी, 20 people) is far longer than its neighbours — six columns
+     let the long lists share the sheet instead of forcing a second one. */
+  .page.dense .grid.g4 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* ============================================================================
+   Compact-v5: station-officer (Sr-PI) card corrections — user pass 2026-10-13.
+   Four explicit asks: no dotted underlines before दिवस:/रात्र:, a thinner card, real
+   breathing room between the three page-1 bands, and every seat inside the card CRUDable.
+   ========================================================================== */
+
+/* 1. the fill-in-the-blank rules are gone — an empty seat simply reads empty */
+.sr-pi-body .ln .blank,
+.sr-pi-body .ln .v.empty {
+  border-bottom: 0;
+  min-width: 0;
+  background: none;
+  height: auto;
+}
+
+.sr-pi-body .v {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 20mm;
+}
+
+.sr-pi-body .v.empty {
+  min-width: 12mm;
+}
+
+/* a seat in the card behaves exactly like a slot in any desk table */
+.sr-pi-body .v.slot {
+  cursor: pointer;
+}
+
+body.mode-edit .sr-pi-body .v.slot {
+  cursor: pointer;
+}
+
+/* same affordance as a desk slot: dashed outline + tint on hover, nothing at rest */
+body.mode-edit .sr-pi-body .v.slot:hover,
+body.mode-edit .sr-pi-body .v.new-seat:hover {
+  outline: 1px dashed var(--navy-3);
+  outline-offset: 1px;
+  border-radius: 2px;
+  background: #f0f7ff;
+}
+
+/* `+ जागा` and ✕ — edit-mode only (also `.no-print`, so they never reach the sheet) */
+.sr-pi-body .add-seat,
+.sr-pi-body .seat-x {
+  align-self: center;
+  border: 1px dashed var(--navy-3);
+  background: #f6f9fd;
+  color: var(--navy-2);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
+.sr-pi-body .add-seat:hover {
+  background: var(--navy-3);
+  border-style: solid;
+  color: #fff;
+}
+
+.sr-pi-body .seat-x {
+  color: #991b1b;
+  border-color: #fca5a5;
+  background: #fef2f2;
+  padding: 2px 4px;
+}
+
+.sr-pi-body .seat-x:hover {
+  background: #fee2e2;
+}
+
+body:not(.mode-edit) .sr-pi-body .add-seat,
+body:not(.mode-edit) .sr-pi-body .seat-x {
+  display: none;
+}
+
+/* 2. thinner card: 6/7px → 4/4px vertical padding, tighter group rhythm */
+.page .sr-pi-header {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.page .sr-pi-body {
+  padding-top: 4px;
+  padding-bottom: 5px;
+  gap: 3px 20px;
+}
+
+.page .sr-pi-body .grp {
+  gap: 1.5px;
+}
+
+.page .sr-pi-body .grp + .grp {
+  padding-left: 20px;
+}
+
+/* 3. breathing room between the three page-1 bands: card → officer band → day/night/office.
+   They were stacked with no vertical separation (the `.grid` gap only spaces items INSIDE a
+   band). Sized to the measured budget: page 1 is the tallest sheet at 750px. */
+.page .sr-pi-card {
+  margin-top: 0;
+  margin-bottom: 9px;
+}
+
+.page > .grid.g-off {
+  margin-bottom: 8px;
+}
+
+/* WIP placeholder page (the flyer that opens when a planned nav leaf is clicked) */
+.wip-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 4px 0 8px;
+}
+
+/* ---- presentation controls UI (edit mode → `स्वरूप`) ------------------------- */
+/* The persistence contract and the CSS hooks already shipped with work unit 1011; this is the
+   screen side: highlight every named element, click it, choose align / vertical / compact /
+   hide. Hidden elements stay listed in a restore bar — hiding is never a one-way door. */
+/* The standalone लेआउट button and its mode-layout body class are GONE (user 2026-10-13: the
+   button only worked with edit mode on and could not be switched off). The controls now live
+   inside the clicked element's own edit flyer, so no separate mode indicator is needed — the
+   dead `#layout-btn` / `body.mode-layout` rules were removed with it rather than left behind. */
+
+#pv-panel {
+  position: absolute;
+  z-index: 150;
+  width: 232px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 14px 30px rgba(2, 8, 23, .28);
+  padding: 8px;
+  font-size: 11.5px;
+}
+
+#pv-panel .pv-t {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+#pv-panel .pv-k {
+  font-size: 10px;
+  color: #64748b;
+  word-break: break-all;
+  margin: 2px 0 6px;
+}
+
+#pv-panel .pv-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+
+.pv-b {
+  flex: 1 1 auto;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.pv-b:hover {
+  background: #eef4fb;
+}
+
+.pv-b.on {
+  background: #d2a85b;
+  border-color: #d2a85b;
+  color: #10203c;
+}
+
+.pv-b.pv-x {
+  flex: 0 0 auto;
+}
+
+#pv-hidden {
+  position: fixed;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 92vw;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+#pv-hidden .pvh-t {
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+#pv-hidden .pv-b {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+/* ============================================================================
+   User feedback 2026-10-13 (second round) — navbar scale, sticky chart bar,
+   equal-size chowki cells.
+   ========================================================================== */
+
+/* 1. the logo + station lockup read too small next to the nav and the lang toggle */
+#appbar .ab-logo {
+  height: 40px;
+}
+
+#appbar .ab-st b {
+  font-size: 15.5px;
+}
+
+#appbar .ab-st span {
+  font-size: 12px;
+}
+
+/* 6a. the chart's own bar is sticky too — edit mode, lifecycle and print stay reachable while
+   scrolling a long sheet. It parks under the identity bar (56px tall), never over it. */
+.chart-toolbar {
+  position: sticky;
+  top: 56px;
+  z-index: 60;
+}
+
+/* 8. six chowki blocks are EQUAL cells (3×2) even when that leaves whitespace — uneven boxes
+   were rejected. Both rows share one height, so the grid height is decided by the taller row
+   only, never by stacking two tall blocks on top of each other. */
+.page > .grid.g-chowki {
+  grid-template-rows: 1fr 1fr;
+  align-items: stretch;
+}
+
+/* ---- bilingual input aid + master-data viewer (user feedback 2026-10-13) ---- */
+.tr-hint {
+  margin: 2px 0 6px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.md-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.md-counts span {
+  font-size: 10.5px;
+  color: #475569;
+  background: #eef2f7;
+  border: 1px solid #dbe3ec;
+  border-radius: 3px;
+  padding: 2px 7px;
+}
+
+.md-counts b {
+  color: #0e1e38;
+}
+
+.md-scroll {
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #dbe3ec;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.md-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.md-tbl thead th {
+  position: sticky;
+  top: 0;
+  background: #eef2f7;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .3px;
+  color: #475569;
+  padding: 4px 8px;
+  border-bottom: 1px solid #dbe3ec;
+}
+
+.md-tbl td {
+  padding: 3px 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.md-en {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.md-off {
+  color: #b45309;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.md-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.md-tag {
+  font-size: 10.5px;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.md-tag i {
+  color: #94a3b8;
+  font-style: normal;
+  font-size: 9px;
+}
+
+/* ---- legacy reference chart (separate local app on :3100) ------------------ */
+.lg-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  background: #eef2f7;
+  color: #475569;
+}
+
+.lg-status.on {
+  background: #eaf7ee;
+  color: #166534;
+}
+
+.lg-status.off {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.lg-cmd {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: #0e1e38;
+  color: #e8eef7;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 0 0 8px;
+}
+
+.lg-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.lg-frame {
+  width: 100%;
+  height: 62vh;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* two legacy reference builds side by side (user 2026-10-13): each gets its own status row and
+   its own frame, so it is always clear which app answered. */
+.lg-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 8px;
+  margin-bottom: 8px;
+  background: #f8fafc;
+}
+
+.lg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.lg-card .lg-status {
+  margin-bottom: 0;
+}
+
+.lg-frame.short {
+  height: 30vh;
+}
+
+/* ============================================================================
+   Round 4 (user feedback 2026-10-13, third message) — navbar, dropdown layering,
+   abbreviation tooltips, the station-officer card, and the new CRUD surfaces.
+   ========================================================================== */
+
+/* 3. The nav dropdowns were painted UNDER the sticky chart bar: `z-index` only compares inside
+   one stacking context, and #appbar created its own at 30 while .chart-toolbar sits at 60, so
+   80 on the menu could never win. The identity bar is now above the chart bar (and still below
+   the flyer overlay at 100). */
+#appbar {
+  z-index: 90;
+}
+
+.ab-menu {
+  z-index: 95;
+}
+
+/* 5. Nav items read as buttons because the frozen baseline styles EVERY `.toolbar button` with a
+   border and a dark fill. They are text: no box, no border until you touch them. The language
+   toggle, the login chip and the toolbar actions keep their own boxed look. */
+#appbar .ab-gbtn {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 7px 9px;
+  color: #b9c8dd;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#appbar .ab-gbtn:hover {
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+
+#appbar .ab-gbtn:active {
+  background: rgba(255, 255, 255, .16);
+}
+
+#appbar .ab-gbtn.active,
+#appbar .ab-group.open .ab-gbtn {
+  color: #fff;
+  border-bottom-color: #d2a85b;
+  background: rgba(255, 255, 255, .06);
+}
+
+/* 7. The station-officer card is an ordinary box now: no heavy navy frame (it matched nothing
+   else on the sheet) and it hugs its own content — the old 520px min-width is what left white
+   space to the left and right inside it while the officer boxes below sat tight. */
+.page .sr-pi-card {
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 auto 9px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+}
+
+/* The card's header line reads symmetrically in its own space (user 2026-10-13): “वपोनि गजेंद्र
+   पाटील   ठाणे प्रमुख” sits centred as ONE group, with equal breathing room on both sides and a
+   fixed gap between the rank+name and the chip — not left-hugging the frame. */
+.page .sr-pi-header {
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 14px;
+}
+
+.page .sr-pi-header .sr-pi-title,
+.page .sr-pi-header .chip {
+  flex: 0 0 auto;
+}
+
+.page .sr-pi-body {
+  justify-content: flex-start;
+  gap: 3px 16px;
+  padding: 5px 10px;
+}
+
+.page .sr-pi-body .grp + .grp {
+  padding-left: 16px;
+}
+
+/* An unfilled support seat is an ORDINARY cell, not a dotted box: the card's चालक/RTPC दिवस/रात्र
+   rows used to carry a permanent dashed rectangle in edit mode and a wider min-width than every
+   real value cell, which is what the clerk saw as “very thin dotted lines or rectangles in the
+   empty spaces” (user 2026-10-13: “treat them and space after them as normal cells as everything
+   else”). The seat now has the same geometry as a value cell and the same affordance as every
+   other slot in the chart — a dashed outline on HOVER only. Clicking it still creates the real
+   VACANT_RIKT seat through the support API (`+ जागा` is gone). */
+.sr-pi-body .v.new-seat {
+  display: inline-block;
+  min-width: 12mm;
+}
+
+body.mode-edit .sr-pi-body .v.new-seat {
+  cursor: pointer;
+}
+
+/* 8. Abbreviations: the dotted underline is gone; the full form appears ABOVE-LEFT of the token
+   on ONE line. The bubble is a JS-positioned element (#abbr-tip) because a CSS ::after bubble
+   cannot escape the .blk / .tbl-wrap overflow clip — it was cut off at the parent box edge. */
+abbr.abbr {
+  border-bottom: 0;
+}
+
+abbr.abbr:hover,
+abbr.abbr:focus {
+  background: #eef4fb;
+  border-radius: 2px;
+  outline: none;
+}
+
+#abbr-tip {
+  position: fixed;
+  z-index: 180;
+  background: var(--navy);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.2;
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .22);
+  pointer-events: none;
+}
+
+#abbr-tip[hidden] {
+  display: none;
+}
+
+/* ---- bilingual pair + review strip (user 2026-10-13) ----------------------- */
+/* A converted value is OFFERED, never applied: the strip shows the suggestion in an editable
+   field and only “वापरा / Use” copies it into the other script field. Same look in every flyer,
+   because one hook mounts it for all of them. */
+.tl-roman {
+  border-style: dashed !important;
+}
+
+.tl-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 2px;
+  padding: 4px 6px;
+  border: 1px solid #cfe0f5;
+  border-left: 3px solid var(--navy-3);
+  border-radius: 4px;
+  background: #f3f8ff;
+}
+
+.tl-strip[hidden] {
+  display: none;
+}
+
+.tl-strip .tl-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.tl-strip .tl-prev {
+  flex: 1 1 170px;
+  min-width: 120px;
+  font-size: 11.5px;
+  padding: 3px 6px;
+  border: 1px solid var(--navy-3);
+  border-radius: 3px;
+  background: #fff;
+}
+
+.tl-strip .tl-ok,
+.tl-strip .tl-no {
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.tl-strip .tl-ok {
+  border: 1px solid #15803d;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.tl-strip .tl-ok:hover {
+  background: #dcfce7;
+}
+
+.tl-strip .tl-no {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #475569;
+}
+
+.tl-strip .tl-what {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* ---- CRUD surfaces (user 2026-10-13, item 11) ------------------------------- */
+/* Scan schedule (Option A): the source's own session cards + the hourly strip folded into three
+   sub-columns, so no short table stretches to the height of the long one beside it. */
+.grid.g-scan-sessions,
+.grid.g-scan-hours {
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+}
+
+.grid.g-scan-hours {
+  margin-top: 6px;
+}
+
+.grid.g-scan-sessions .tbl thead th {
+  text-align: center;
+  font-size: 11px;
+  background: #e7edf5;
+}
+
+/* Court/summons/warrant: one small card per heading (the source prints a heading line with the
+   names under it, never a page-wide register). */
+.grid.g-court,
+.grid.g-tables {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: start;
+  gap: 6px;
+}
+
+.grid.g-tables {
+  min-width: 190px;
+  margin-top: 8px;
+}
+
+.blk.court .body {
+  gap: 1px;
+}
+
+.blk.court .p.note .n {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 1120px) {
+
+  .grid.g-scan-sessions,
+  .grid.g-scan-hours {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* The ✕ controls for chart-local tables, columns and notice lines: edit mode only, and the
+   `.no-print` class keeps them off the sheet. Nothing here changes printed content. */
+.col-x,
+.notice-x {
+  display: none;
+  border: 1px solid #fecdd3;
+  border-radius: 3px;
+  background: #fff;
+  color: #b42318;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1px 4px;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+body.mode-edit .col-x,
+body.mode-edit .notice-x {
+  display: inline-block;
+}
+
+body.mode-edit .col-x:hover,
+body.mode-edit .notice-x:hover {
+  background: #fff1f2;
+}
+
+.add-box.tiny,
+.col-add .add-box.tiny {
+  padding: 2px 6px;
+  min-height: 0;
+  font-size: 10px;
+  border-radius: 3px;
+}
+
+body:not(.mode-edit) .col-add,
+body:not(.mode-edit) .add-box.tiny,
+body:not(.mode-edit) .tbl-actions {
+  display: none;
+}
+
+.tbl-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* editable value cells (sign-off lines) and notice lines: the same “click me in edit mode”
+   affordance every name already has. */
+body.mode-edit .val[data-value-key],
+body.mode-edit .notice-line {
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+body.mode-edit .val[data-value-key]:hover,
+body.mode-edit .notice-line:hover {
+  background: #eef4fb;
+  outline: 1px dashed var(--navy-3);
+}
+
+body.mode-edit [data-table-cell],
+body.mode-edit [data-table-col],
+body.mode-edit [data-table-title],
+body.mode-edit [data-matrix-cell] {
+  cursor: pointer;
+}
+
+body.mode-edit [data-table-cell]:hover,
+body.mode-edit [data-table-col]:hover,
+body.mode-edit [data-table-title]:hover,
+body.mode-edit [data-matrix-cell]:hover {
+  background: #eef4fb;
+  outline: 1px dashed var(--navy-3);
+}
+
+/* ---- print: authoring chrome NEVER prints --------------------------------- */
+@media print {
+
+  #pv-panel,
+  #pv-hidden,
+  #abbr-tip,
+  .add-box,
+  .box-del,
+  .col-x,
+  .notice-x,
+  .tbl-actions,
+  .toast,
+  .flyer-overlay,
+  .flyer-card {
+    display: none !important;
+  }
+
+  /* the bilingual review strip is chrome, never a printed value */
+  .tl-strip,
+  .tl-roman {
+    display: none !important;
+  }
+
+  /* the inline add tile is hidden in print → the officer band keeps four equal columns,
+     and the ✕ control never takes a column of its own */
+  body.mode-edit .grid.g-off.fit {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  abbr.abbr {
+    border-bottom: 0 !important;
+  }
+
+  body.mode-edit .dt td.slot {
+    outline: none !important;
+    background: transparent !important;
+    cursor: auto;
+  }
+
+  body.mode-edit .dt td.slot:hover::after {
+    content: none !important;
+  }
+
+  body.mode-edit [data-label] {
+    cursor: auto !important;
+  }
+
+  body.mode-edit [data-label]:hover,
+  body.mode-edit [data-label]:focus {
+    outline: none !important;
+    background: transparent !important;
+  }
+}

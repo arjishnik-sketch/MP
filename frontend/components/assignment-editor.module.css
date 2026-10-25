@@ -1,0 +1,94 @@
+/*
+ * Purpose: Bounded assignment picker with actions outside its internal scroller.
+ * Current role: Keep existing-person, master and create flows reachable in one dialog.
+ * Last meaningful change: 2026-10-18 — theme-aware, localized picker modes.
+ * Constraint: Marathi person/duty data wraps; only lists/forms may scroll internally.
+ */
+.dialog.dialog {
+  display: flex;
+  width: min(720px, calc(100vw - 2rem));
+  height: min(800px, calc(100dvh - 2rem));
+  max-height: calc(100dvh - 2rem);
+  flex-direction: column;
+  overflow: hidden;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: .875rem;
+}
+
+.dialog .header { flex: 0 0 auto; border-color: var(--line); background: var(--surface-muted); padding: 16px 44px 14px 20px; color: var(--ink); }
+.header h2 { color: var(--ink); font-size: 1rem; line-height: 1.4; overflow-wrap: anywhere; }
+.dialog .header .context { color: var(--muted); font-size: .875rem; overflow-wrap: anywhere; }
+.currentSeat { display: grid; flex: 0 0 auto; gap: 10px; border-bottom: 1px solid var(--line-soft); padding: 14px 20px; }
+.currentIdentity { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.fieldLabel { color: var(--muted); font-size: .875rem; font-weight: 600; }
+.person { min-width: 0; flex: 1 1 240px; color: var(--ink); font-size: .875rem; overflow-wrap: anywhere; }
+.seatActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.bimaControl { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.bimaControl > span { display: grid; gap: 1px; }
+.hint { display: block; margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere; }
+.modeButtons { display: flex; flex: 0 0 auto; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line-soft); background: var(--surface-muted); padding: 8px 16px; }
+.modeButtons button { min-height: 34px; flex: 1 1 auto; border: 1px solid transparent; border-radius: 5px; background: transparent; padding: 6px 10px; color: var(--muted); text-align: center; font-size: .875rem; font-weight: 600; }
+.modeButtons button[aria-pressed="true"] { border-color: var(--line); background: var(--surface); color: var(--ink); }
+.modeButtons button:hover:not(:disabled) { color: var(--navy); }
+.modeButtons button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.modeButtons button:disabled { opacity: .5; cursor: default; }
+.panel { display: flex; min-height: 0; flex: 1 1 auto; overflow: hidden; padding: 16px 20px; }
+.panel h3 { margin: 0 0 5px; color: var(--ink); font-size: .875rem; font-weight: 600; }
+.picker { display: flex; width: 100%; min-width: 0; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+.pickerHeading { flex: 0 0 auto; margin-bottom: 12px; }
+.searchFields { display: flex; min-width: 0; flex: 0 0 auto; gap: 12px; }
+.formField,
+.rankField { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.searchFields .formField { flex: 1 1 auto; }
+.rankField { flex: 0 1 130px; }
+.formField label,
+.rankField label { color: var(--muted); font-size: .875rem; font-weight: 600; }
+.formField input,
+.formField select,
+.rankField select { width: 100%; min-width: 0; min-height: 36px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); padding: 7px 9px; color: var(--ink); font-size: .875rem; outline: none; }
+.formField input:focus,
+.formField select:focus,
+.rankField select:focus { border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: 1px; }
+.formField input:read-only,
+.formField input:disabled,
+.formField select:disabled { background: var(--surface-muted); color: var(--muted); }
+.resultCount { flex: 0 0 auto; margin: 9px 0; color: var(--muted); font-size: .875rem; }
+.staffList { min-height: 0; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; margin: 0; border: 1px solid var(--line); border-radius: 5px; padding: 0; list-style: none; }
+.staffList li + li { border-top: 1px solid var(--line-soft); }
+.staffOption { display: flex; width: 100%; min-width: 0; align-items: center; justify-content: space-between; gap: 14px; border: 0; background: var(--surface); padding: 10px 12px; color: var(--ink); text-align: left; font-size: .875rem; }
+.staffOption:hover,
+.staffOption:focus-visible { background: var(--band); }
+.staffOption:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.staffOption:disabled { cursor: default; opacity: .55; }
+.staffName { display: flex; min-width: 0; flex: 1 1 auto; flex-wrap: wrap; gap: 3px 7px; overflow-wrap: anywhere; }
+.rankCode,
+.buckle { white-space: nowrap; }
+.chooseAction { flex: 0 0 auto; color: var(--navy); }
+.empty { padding: 16px 12px; color: var(--muted); font-size: .875rem; }
+.formPanel { display: flex; width: 100%; min-height: 0; flex-direction: column; gap: 16px; overflow-y: auto; overscroll-behavior: contain; padding: 2px; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.fullField { grid-column: 1 / -1; }
+.savedPerson { margin: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-muted); padding: 10px 12px; color: var(--ink); font-size: .875rem; overflow-wrap: anywhere; }
+.feedback { max-height: 120px; flex: 0 0 auto; overflow-y: auto; border-top: 1px solid var(--line); background: var(--surface-muted); padding: 10px 20px; color: var(--ink); font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere; }
+.feedback[data-error="true"] { border-left: 3px solid var(--danger); }
+.footer { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); background: var(--surface); padding: 12px 20px; }
+
+@media (max-width: 560px) {
+  .dialog .header { padding-left: 14px; }
+  .currentSeat,
+  .panel,
+  .footer { padding-inline: 14px; }
+  .modeButtons { padding-inline: 10px; }
+  .person { flex-basis: 100%; }
+  .searchFields { gap: 8px; }
+  .rankField { flex-basis: 105px; }
+  .chooseAction { max-width: 90px; flex-shrink: 1; text-align: right; }
+}
+
+@media (max-height: 560px) {
+  .dialog.dialog { overflow-y: auto; }
+  .panel { min-height: 220px; flex-shrink: 0; }
+  .footer { position: sticky; bottom: 0; }
+}

@@ -1,0 +1,67 @@
+/*
+ * Purpose: Theme-aware chart toolbar and viewport-bounded date menu.
+ * Current role: Keep search outside the internal date scroller using Radix collision geometry.
+ * Last meaningful change: 2026-10-18 — localized toolbar with accessible date navigation.
+ * Constraint: Shared primitives own portals, dismissal, focus restoration and trigger state.
+ */
+.toolbar { background: var(--surface-muted); border-color: var(--line); color: var(--ink); font-size: .875rem; }
+.versionField,
+.dateControl { display: flex; min-width: 0; align-items: center; gap: 8px; }
+.versionField { flex: 0 1 auto; }
+.dateControl { flex: 0 1 auto; }
+.label { color: var(--muted); font-size: .875rem; font-weight: 600; white-space: nowrap; }
+.dateTrigger { min-width: 190px; justify-content: space-between; }
+.triggerValue { display: flex; min-width: 0; flex-wrap: wrap; gap: 4px 8px; text-align: left; }
+.weekday { color: var(--muted); }
+
+.viewToggle { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 3px; }
+.viewToggle button { min-height: 32px; border: 0; border-radius: 4px; background: transparent; padding: 5px 12px; color: var(--muted); font-size: .875rem; font-weight: 600; white-space: nowrap; }
+.viewToggle button:hover,
+.viewToggle button[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+.viewToggle button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.viewToggle button:disabled { cursor: default; opacity: .5; }
+
+.paperControl { display: flex; align-items: center; gap: 6px; }
+
+.datePopover.datePopover {
+  display: flex;
+  width: min(420px, calc(100vw - 24px));
+  min-width: 0;
+  max-height: min(560px, var(--radix-dropdown-menu-content-available-height));
+  flex-direction: column;
+  overflow: hidden;
+  border-color: var(--line);
+  background: var(--surface);
+  padding: 0;
+  color: var(--ink);
+}
+
+.searchRow { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; border-bottom: 1px solid var(--line-soft); padding: 10px; }
+.searchRow input { width: 0; min-width: 0; flex: 1 1 auto; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); padding: 8px 10px; color: var(--ink); font-size: .875rem; outline: none; }
+.searchRow input:focus { border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: 1px; }
+.advancedSearch { display: inline-flex; min-width: 36px; min-height: 36px; flex: 0 0 36px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; color: var(--navy); text-decoration: none; }
+.advancedSearch:hover,
+.advancedSearch:focus { background: var(--band); }
+.dateList { min-height: 0; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 8px; }
+.groupLabel { margin-top: 8px; padding: 5px 8px; color: var(--muted); font-size: .875rem; font-weight: 600; letter-spacing: normal; text-transform: none; }
+.dateOption { display: flex; min-width: 0; justify-content: space-between; gap: 12px; padding: 9px 8px; color: var(--ink); font-size: .875rem; }
+.dateOption[data-current],
+.dateOption[data-highlighted] { background: var(--band); color: var(--ink); }
+.dateOption[data-disabled] { opacity: 1; color: var(--muted); cursor: default; }
+.dateValue { display: flex; min-width: 0; flex: 1 1 auto; flex-wrap: wrap; gap: 3px 8px; }
+.dateStatus { max-width: 48%; flex: 0 1 auto; color: var(--muted); text-align: right; overflow-wrap: anywhere; }
+.empty { margin: 0; padding: 8px; color: var(--muted); font-size: .875rem; }
+.actionMenu { width: min(290px, calc(100vw - 24px)); border-color: var(--line); background: var(--surface); }
+.pendingAction { justify-content: space-between; gap: 12px; }
+.pendingAction > span:last-child { color: var(--muted); }
+.exportInstruction { margin: 0; padding: 8px 10px; color: var(--muted); font-size: .875rem; line-height: 1.45; }
+
+@media (max-width: 560px) {
+  .versionField,
+  .dateControl { width: 100%; }
+  .versionField > button,
+  .dateControl > button { flex: 1 1 auto; }
+  .label { min-width: 52px; }
+}
+
+@media print { .toolbar { display: none !important; } }

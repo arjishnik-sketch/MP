@@ -1,0 +1,51 @@
+/* Purpose: Whitelisted chart presentation hooks, shared by preview and print.
+ * Current role: Applies persisted per-element alignment, visibility and compact density.
+ * Last meaningful change: 2026-10-13 — separate from client authoring/frozen baseline.
+ * Constraint: Inactive without explicit overrides; wraps Marathi, never truncates. */
+[data-presentation][data-horizontal-align="left"] { text-align:left !important; }
+[data-presentation][data-horizontal-align="center"] { text-align:center !important; }
+[data-presentation][data-horizontal-align="right"] { text-align:right !important; }
+[data-presentation][data-vertical-align="top"] { vertical-align:top !important; align-content:start; }
+[data-presentation][data-vertical-align="middle"] { vertical-align:middle !important; align-content:center; }
+[data-presentation][data-vertical-align="bottom"] { vertical-align:bottom !important; align-content:end; }
+[data-presentation][data-presentation-hidden="true"] { display:none !important; }
+[data-presentation][data-compact="true"] { line-height:1.15 !important; padding-block:1px !important; }
+[data-presentation][data-presentation-kind="section"][data-compact="true"] .body { padding-block:3px; }
+[data-presentation][data-presentation-kind="section"][data-compact="true"] :is(.dt th,.dt td,.tbl th,.tbl td) { padding-block:1px; line-height:1.15; }
+/* Named section/block labels stay on their existing markup so legacy layout selectors keep
+ * working; these parent selectors make a section-level override cover its content. */
+.sec:has(> h2[data-presentation-hidden="true"]),
+.blk:has(> .bh .nm[data-presentation-hidden="true"]),
+.blk:has(> .ch-head .nm[data-presentation-hidden="true"]),
+.sig:has(> span[data-presentation-hidden="true"]) { display:none !important; }
+.sec:has(> h2[data-compact="true"]) :is(h2,.body,.tbl-wrap),
+.blk:has(> .bh .nm[data-compact="true"]) :is(.bh,.body,.dt,.tbl-wrap),
+.blk:has(> .ch-head .nm[data-compact="true"]) :is(.ch-head,.body,.dt,.tbl-wrap) { line-height:1.15; }
+.sec:has(> h2[data-compact="true"]) :is(.dt th,.dt td,.tbl th,.tbl td),
+.blk:has(> .bh .nm[data-compact="true"]) :is(.dt th,.dt td,.tbl th,.tbl td),
+.blk:has(> .ch-head .nm[data-compact="true"]) :is(.dt th,.dt td,.tbl th,.tbl td) { padding-block:1px; }
+/* Alignment on a section applies to its cells too; an explicit child override wins. */
+[data-presentation-kind="section"][data-horizontal-align="left"] :is(th,td):not([data-horizontal-align]) { text-align:left !important; }
+[data-presentation-kind="section"][data-horizontal-align="center"] :is(th,td):not([data-horizontal-align]) { text-align:center !important; }
+[data-presentation-kind="section"][data-horizontal-align="right"] :is(th,td):not([data-horizontal-align]) { text-align:right !important; }
+[data-presentation-kind="section"][data-vertical-align="top"] :is(th,td):not([data-vertical-align]) { vertical-align:top !important; }
+[data-presentation-kind="section"][data-vertical-align="middle"] :is(th,td):not([data-vertical-align]) { vertical-align:middle !important; }
+[data-presentation-kind="section"][data-vertical-align="bottom"] :is(th,td):not([data-vertical-align]) { vertical-align:bottom !important; }
+.sec:has(> h2[data-horizontal-align="left"]) :is(h2,th,td):not([data-horizontal-align]) { text-align:left !important; }
+.sec:has(> h2[data-horizontal-align="center"]) :is(h2,th,td):not([data-horizontal-align]) { text-align:center !important; }
+.sec:has(> h2[data-horizontal-align="right"]) :is(h2,th,td):not([data-horizontal-align]) { text-align:right !important; }
+.blk:has(> .bh .nm[data-horizontal-align="left"]) :is(.bh,th,td):not([data-horizontal-align]) { text-align:left !important; }
+.blk:has(> .bh .nm[data-horizontal-align="center"]) :is(.bh,th,td):not([data-horizontal-align]) { text-align:center !important; }
+.blk:has(> .bh .nm[data-horizontal-align="right"]) :is(.bh,th,td):not([data-horizontal-align]) { text-align:right !important; }
+.blk:has(> .ch-head .nm[data-horizontal-align="left"]) :is(.ch-head,th,td):not([data-horizontal-align]) { text-align:left !important; }
+.blk:has(> .ch-head .nm[data-horizontal-align="center"]) :is(.ch-head,th,td):not([data-horizontal-align]) { text-align:center !important; }
+.blk:has(> .ch-head .nm[data-horizontal-align="right"]) :is(.ch-head,th,td):not([data-horizontal-align]) { text-align:right !important; }
+.sec:has(> h2[data-vertical-align="middle"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .bh .nm[data-vertical-align="middle"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .ch-head .nm[data-vertical-align="middle"]) :is(th,td):not([data-vertical-align]) { vertical-align:middle !important; }
+.sec:has(> h2[data-vertical-align="top"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .bh .nm[data-vertical-align="top"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .ch-head .nm[data-vertical-align="top"]) :is(th,td):not([data-vertical-align]) { vertical-align:top !important; }
+.sec:has(> h2[data-vertical-align="bottom"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .bh .nm[data-vertical-align="bottom"]) :is(th,td):not([data-vertical-align]),
+.blk:has(> .ch-head .nm[data-vertical-align="bottom"]) :is(th,td):not([data-vertical-align]) { vertical-align:bottom !important; }

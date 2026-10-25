@@ -1,0 +1,12 @@
+/*
+ * Purpose: Date-first archive typography over the shared left-aligned table.
+ * Current role: Theme-aware chrome; filter sizing belongs to ManagementTable.
+ * Last meaningful change: 2026-10-18 — archive alignment and localized controls.
+ * Constraint: Saved chart text and lifecycle values are never mutated here.
+ */
+.archive { color: var(--ink); }
+.archive :global(.page-heading) { align-items: flex-start; }
+.archive :global(.page-heading) h1 { color: var(--ink); font-size: 1.5rem; font-weight: 600; }
+.archive :global(.form-field) label { color: var(--muted); font-size: .875rem; }
+.archive :global(.form-field) input,
+.archive :global(.form-field) select { background: var(--surface); border-color: var(--line); color: var(--ink); font-size: .875rem; }
