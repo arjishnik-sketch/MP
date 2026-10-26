@@ -193,7 +193,7 @@ export async function deleteScanRow(db: Queryable, date: string, id: unknown) {
   const scanRowId = positiveInteger(id, "scanRowId");
   return withWritableChart(db, date, async ({ chartId, client }) => {
     const res = await client.query(
-      `DELETE FROM scan_schedule_daily WHERE scan_row_id = $1 AND chart_id = $2 RETURNING scan_row_id`,
+      `DELETE FROM scan_schedule_daily WHERE (scan_row_id = $1 OR sequence = $1) AND chart_id = $2 RETURNING scan_row_id`,
       [scanRowId, chartId],
     );
     if (res.rows.length === 0) throw new RegisterError(`no scan row ${scanRowId}`, 404);
@@ -208,8 +208,8 @@ export async function addSuddenChange(db: Queryable, date: string, input: unknow
   const body = isRecord(input) ? input : {};
   const originalStaffId = nullablePositiveInteger(body.originalStaffId ?? body.original_staff_id, "originalStaffId");
   const replacementStaffId = nullablePositiveInteger(body.replacementStaffId ?? body.replacement_staff_id, "replacementStaffId");
-  const detailMr = safeText(body.detailMr ?? body.detail_mr, "detailMr", 400, true) as string;
-  const noteMr = safeText(body.noteMr ?? body.note_mr, "noteMr", 400);
+  const detailMr = safeText(body.detailMr ?? body.detail_mr ?? body.changeText ?? body.change_text, "detailMr", 400, true) as string;
+  const noteMr = safeText(body.noteMr ?? body.note_mr ?? body.reasonText ?? body.reason_text, "noteMr", 400);
 
   return withWritableChart(db, date, async ({ chartId, client }) => {
     if (originalStaffId !== null) {
@@ -286,7 +286,7 @@ export async function deleteSuddenChange(db: Queryable, date: string, id: unknow
   const changeId = positiveInteger(id, "changeId");
   return withWritableChart(db, date, async ({ chartId, client }) => {
     const res = await client.query(
-      `DELETE FROM sudden_duty_changes WHERE change_id = $1 AND chart_id = $2 RETURNING change_id`,
+      `DELETE FROM sudden_duty_changes WHERE (change_id = $1 OR seq = $1) AND chart_id = $2 RETURNING change_id`,
       [changeId, chartId],
     );
     if (res.rows.length === 0) throw new RegisterError(`no sudden change ${changeId}`, 404);

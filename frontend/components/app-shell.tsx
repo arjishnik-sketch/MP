@@ -118,34 +118,82 @@ function Header() {
 
         <nav className="shell-nav" aria-label="Main navigation">
           <NavLink href="/dashboard">{t("dashboard")}</NavLink>
+
+          {/* Daily Work */}
           <DropdownMenu>
-             <MenuTrigger>{t("dailyCharts")}</MenuTrigger>
-             <DropdownMenuContent align="start" className="shell-menu-content shell-menu-wide">
-               <DropdownMenuGroup>
-                 <ChartPreviewMenuLink />
-                 <DropdownMenuItem asChild>
-                   <Link href="/charts">{t("allCharts")}</Link>
-                 </DropdownMenuItem>
-                <WipItem>{t("versions")}</WipItem>
+            <DropdownMenuTrigger className={cn("shell-nav-link shell-menu-trigger", (pathname.startsWith("/charts") || pathname.startsWith("/daily-work") || pathname === "/staff/attendance") && "is-active")}>
+              <span>{t("dailyWork")}</span><ChevronDown />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="shell-menu-content shell-menu-wide">
+              <DropdownMenuGroup>
+                <ChartPreviewMenuLink />
+                <DropdownMenuItem asChild>
+                  <Link href="/daily-work/duties">{t("assignDuties")}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/staff/attendance">{t("dailyAttendance")}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/daily-work/leaves">{t("leaveAttachments")}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/daily-work/standing-charges">{t("standingCharges")}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/daily-work/registers">{t("chartRegisters")}</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <WipItem>{t("importOld")}</WipItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/charts">{t("versions")}</Link>
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Staff & Masters */}
           <DropdownMenu>
-            <DropdownMenuTrigger className={cn("shell-nav-link shell-menu-trigger", pathname.startsWith("/staff") && "is-active")}>
-              <span>{t("manageStaff")}</span><ChevronDown />
+            <DropdownMenuTrigger className={cn("shell-nav-link shell-menu-trigger", (pathname === "/staff" || pathname.startsWith("/master-data")) && "is-active")}>
+              <span>{t("staffAndMasters")}</span><ChevronDown />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="shell-menu-content">
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild><Link href="/staff">{t("staffRecords")}</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/staff/attendance">{t("dailyAttendance")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/staff">{t("manageStaff")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data">{t("masterData")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data?tab=duties">{t("dutyCatalog")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data?tab=ranks">{t("ranks")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data?tab=locations">{t("locations")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data?tab=units">{t("units")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/master-data?tab=strength">{t("strengthConfig")}</Link></DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <NavLink href="/master-data">{t("masterData")}</NavLink>
-          <NavLink href="/history">{t("history")}</NavLink>
-          <NavLink href="/reports">{t("reports")}</NavLink>
+
+          {/* History & Reports */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className={cn("shell-nav-link shell-menu-trigger", (pathname.startsWith("/history") || pathname.startsWith("/reports")) && "is-active")}>
+              <span>{t("historyAndReports")}</span><ChevronDown />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="shell-menu-content">
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild><Link href="/charts">{t("savedCharts")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/history">{t("dutyHistory")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/history">{t("attendanceHistory")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/reports">{t("monthlyAttendance")}</Link></DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Integrations */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="shell-nav-link shell-menu-trigger">
+              <span>{t("integrations")}</span><ChevronDown />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="shell-menu-content">
+              <DropdownMenuGroup>
+                <WipItem>{t("whatsapp")}</WipItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
 
         <div className="header-actions">

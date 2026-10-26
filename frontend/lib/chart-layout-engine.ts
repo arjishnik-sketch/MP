@@ -68,7 +68,7 @@ export function getPageMetrics(paperSize: PaperSize, orientation: PaperOrientati
     // 400mm printable width: broad canvas
     chowkiColumns = 3;
     stationColumns = 3;
-    specialColumns = 2;
+    specialColumns = 4;
     availabilityColumns = 4;
     packedRosterColumns = 4;
   } else if (!isA3 && !isLandscape) {
@@ -82,16 +82,16 @@ export function getPageMetrics(paperSize: PaperSize, orientation: PaperOrientati
     // A3 Portrait: 277mm printable width (same as A4 landscape width, but tall)
     chowkiColumns = 3;
     stationColumns = 3;
-    specialColumns = 2;
+    specialColumns = 3;
     availabilityColumns = 3;
     packedRosterColumns = 3;
   } else {
     // A4 Landscape: 281mm printable width
     chowkiColumns = 3;
     stationColumns = 3;
-    specialColumns = 2;
-    availabilityColumns = 4;
-    packedRosterColumns = 4;
+    specialColumns = 5;
+    availabilityColumns = 6;
+    packedRosterColumns = 5;
   }
 
   return {
@@ -126,18 +126,18 @@ export function planChartSheets(
   metrics: PageMetrics,
   hasEvents: boolean = false
 ): SheetDefinition[] {
-  // Unified 6 balanced, zero-overflow sheets across A4 Landscape, A3 Landscape, and A4 Portrait:
-  // Sheet 1: Command (Leadership, principal officers, station day/night/office desks)
-  // Sheet 2: Chowkis (The 6 police chowkis with in-charge and marshals in 3x2 grid)
-  // Sheet 3: Special Duties & Patrol (Court, summons, warrants, special desks side-by-side with scan schedule)
-  // Sheet 4: Availability (Staff availability & leave register in balanced subcolumns)
-  // Sheet 5: Directives & Officers (Daily notices & patrolling officer duty register)
-  // Sheet 7: Events (if any)
+  // 5 Canonical Sheets matching Kushal Figma Page 1 + compv3 Lower Pages:
+  // Sheet 1: Figma Command (Senior PI, 3 supervisors, 4 lower columns: Day, Night, Office, Notices)
+  // Sheet 2: 6 Police Chowkis (3x2 grid with Day/Night sub-columns and Bit Marshals)
+  // Sheet 3: Leave & Special Duties (Availability/Leaves + Court Pairvi & Special Squads)
+  // Sheet 4: Manpower Matrix & Changes (Rank Matrix + Shift Summary + Sudden Change Ledger)
+  // Sheet 5: Officer Summary & Scan Schedule (15 Officers + Patrol/Scan Schedule + Official Sign-off)
+  // Sheet 6: Events Annex (Optional when events exist)
   const sheets: SheetDefinition[] = [
     {
       id: "sheet-command",
       titleMr: "मुख्य ठाणे कर्तव्य व शाखा अधिकारी",
-      subtitleMr: "ठाणे प्रमुख, पोनि शाखा, दिवस/रात्र ठाणे कर्तव्य व कार्यालयीन शाखा",
+      subtitleMr: "ठाणे प्रमुख, पोनि शाखा, दिवस/रात्र ठाणे कर्तव्य, कार्यालयीन शाखा व सूचना",
       sections: ["command"],
     },
     {
@@ -147,28 +147,22 @@ export function planChartSheets(
       sections: ["chowkis"],
     },
     {
-      id: "sheet-special",
-      titleMr: "कोर्ट, समन्स, विशेष कक्ष व गस्त वेळापत्रक",
-      subtitleMr: "कोर्ट पैरवी, समन्स-वॉरंट, विशेष शाखा व सुरक्षित नाशिक गस्त वेळापत्रक",
-      sections: ["special-duties", "scan-schedule"],
-    },
-    {
-      id: "sheet-availability",
-      titleMr: "कर्मचारी उपलब्धता व रजा नोंद",
-      subtitleMr: "साप्ताहिक सुट्टी, किरकोळ रजा, वैद्यकीय रजा व इतर कर्तव्ये",
-      sections: ["availability"],
-    },
-    {
-      id: "sheet-directives",
-      titleMr: "दैनिक सूचना व गस्त अधिकारी नोंद",
-      subtitleMr: "रात्रगस्त सूचना, महत्वाचे निर्देश व गस्त अधिकारी नोंद",
-      sections: ["notices-officers"],
+      id: "sheet-leave-special",
+      titleMr: "रजा, उपलब्धता व कोर्ट / विशेष कर्तव्ये",
+      subtitleMr: "साप्ताहिक सुट्टी, किरकोळ/वैद्यकीय रजा, गैरहजर, कोर्ट पैरवी व विशेष बंदोबस्त",
+      sections: ["availability", "special-duties"],
     },
     {
       id: "sheet-manpower",
-      titleMr: "मनुष्यबळ स्थिती, पाळीनिहाय सारांश व सही-शिक्का",
-      subtitleMr: "मनुष्यबळ दर्शक मॅट्रिक्स, पाळीनिहाय संख्या, अचानक बदल व अधिकृत सही-शिक्का",
+      titleMr: "मनुष्यबळ स्थिती दर्शक मॅट्रिक्स व पाळी सारांश",
+      subtitleMr: "मंजूर/हजर संख्याबळ, पाळीनिहाय सारांश व अचानक बदल नोंद",
       sections: ["manpower-summary"],
+    },
+    {
+      id: "sheet-officers-scan",
+      titleMr: "पोलीस अधिकारी कर्तव्य सारांश व गस्त वेळापत्रक",
+      subtitleMr: "अधिकारी कर्तव्य वाटप, सुरक्षित नाशिक गस्त/स्कॅनिंग व अधिकृत सही-शिक्का",
+      sections: ["officers-scan"],
     },
   ];
 

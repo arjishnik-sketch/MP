@@ -109,6 +109,37 @@
 .a3-command-chowkis-grid .command-section-wrapper { margin-top: 0; }
 .a3-command-chowkis-grid .chart-section { margin-top: 0; }
 
+.unified-chart-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--navy);
+  color: var(--navy);
+}
+.unified-header-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+.unified-header-subtitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+.unified-header-date {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  line-height: 1.35;
+  margin: 0;
+}
+
 .c1-document .chart-title-lines { display: grid; gap: 1px; border-bottom: 1px solid var(--navy); padding: 0 0 8px; color: var(--navy); text-align: center; }
 .c1-document .chart-title-line { display: block; margin: 0; line-height: 1.35; }
 .c1-document .chart-title-line-heading { font-size: 14px; font-weight: var(--chart-heading-weight); }
@@ -130,9 +161,16 @@
 .c1-document .officer-command-heading .person-label, .c1-document .officer-command-heading .command-value { font-size: 13px; font-weight: var(--chart-value-weight); }
 .c1-document .officer-command .command-role { font-size: 11px; }
 .c1-document .station-duty-columns { gap: 10px; grid-template-columns: 1fr 1fr .92fr; align-items: start; }
+.c1-document .station-duty-columns.is-four-col { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .c1-document .station-duty-column { border-color: var(--line); }
 .c1-document .station-duty-column > h3 { padding: 6px 8px; gap: 8px; background: var(--chart-head); font-size: 13px; font-weight: var(--chart-heading-weight); }
 .c1-document .station-duty-column > h3 span { color: var(--muted); font-size: 10px; font-weight: var(--chart-value-weight); }
+.c1-document .notice-column-content { padding: 5px 6px; display: flex; flex-direction: column; gap: 5px; }
+.c1-document .notice-card-item { padding: 4px 6px; background: var(--surface-muted); border: 1px solid var(--line-soft); border-radius: 4px; }
+.c1-document .notice-group-heading { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+.c1-document .notice-group-lines { display: flex; flex-direction: column; gap: 1px; }
+.c1-document .notice-group-lines p { font-size: 11px; line-height: 1.35; color: var(--ink); margin: 0; }
+.c1-officers-scan-container { display: flex; flex-direction: column; gap: 12px; }
 .c1-document .duty-group { min-width: 0; padding: 5px 7px; border-color: var(--chart-rule); }
 .c1-document .duty-group h4 { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; margin-bottom: 3px; color: var(--ink-soft); font-size: 12px; font-weight: var(--chart-heading-weight); line-height: 1.45; overflow-wrap: anywhere; }
 .c1-document .duty-group-heading-label { min-width: 0; overflow-wrap: anywhere; }
@@ -258,20 +296,34 @@
 }
 
 @media print {
+  @page {
+    size: 297mm 210mm;
+    margin: 5mm 7mm;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    font-size: 11px !important;
+  }
   .chart-workspace { padding: 0 !important; width: 100% !important; max-width: 100% !important; }
   .c1-document { padding: 0 !important; border: 0 !important; background: transparent !important; }
   .chart-sheet {
     min-height: 0 !important;
+    max-height: calc(210mm - 10mm) !important;
+    overflow: hidden !important;
     border: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
-    break-after: page;
-    break-inside: avoid;
+    page-break-after: always !important;
+    break-after: page !important;
+    break-inside: avoid !important;
     box-sizing: border-box;
     max-width: 100% !important;
   }
   .chart-sheet:last-child {
+    page-break-after: auto !important;
     break-after: auto !important;
   }
   .sheet-page-indicator { display: none !important; }
@@ -285,31 +337,62 @@
   }
 
   /* Compact print typography and density */
-  .c1-document .chart-section { margin-top: 7px !important; }
-  .c1-document .duty-group { padding: 3px 5px !important; margin-bottom: 2px !important; }
-  .c1-document .duty-group h4 { margin-bottom: 1px !important; font-size: 11px !important; line-height: 1.35 !important; }
-  .c1-document .document-assignment { line-height: 1.35 !important; font-size: 11.5px !important; }
-  .c1-document .person-label { font-size: 11.5px !important; }
-  .c1-document .assignment-meta { font-size: 9.5px !important; }
-  .c1-document .assignment-role, .c1-document .source-label { font-size: 9.5px !important; }
-  .c1-document .location-shift-title { padding: 2px 5px !important; font-size: 10px !important; }
-  .c1-document .location-state-line, .c1-document .marshal-state { padding: 2px 4px !important; font-size: 9.5px !important; }
-  .c1-document .data-table td, .c1-document .data-table th { padding: 2.5px 5px !important; }
-  .c1-document .manpower-matrix th, .c1-document .manpower-matrix td { padding: 2.5px 2px !important; font-size: 9.5px !important; }
-  .c1-document .hourly-scan-register { margin-top: 5px !important; }
-  .c1-document .scan-hour { padding: 2.5px 5px !important; font-size: 10px !important; line-height: 1.35 !important; }
+  .c1-document .chart-section { margin-top: 5px !important; }
+  .c1-document .duty-group { padding: 2px 4px !important; margin-bottom: 2px !important; }
+  .c1-document .duty-group h4 { margin-bottom: 1px !important; font-size: 10.5px !important; line-height: 1.3 !important; }
+  .c1-document .document-assignment { line-height: 1.3 !important; font-size: inherit !important; }
+  .c1-document .person-label { font-size: inherit !important; }
+  .c1-document .assignment-meta { font-size: 9px !important; }
+  .c1-document .assignment-role, .c1-document .source-label { font-size: 9px !important; }
+  .c1-document .location-shift-title { padding: 2px 4px !important; font-size: 9.5px !important; }
+  .c1-document .location-state-line, .c1-document .marshal-state { padding: 2px 4px !important; font-size: 9px !important; }
+  .c1-document .data-table td, .c1-document .data-table th { padding: 2px 4px !important; }
+  .c1-document .manpower-matrix th, .c1-document .manpower-matrix td { padding: 2px 2px !important; font-size: 9px !important; }
+  .c1-document .hourly-scan-register { margin-top: 4px !important; }
+  .c1-document .scan-hour { padding: 2px 4px !important; font-size: 9.5px !important; line-height: 1.3 !important; }
+
+  /* Compact notices on Sheet 1 */
+  .c1-document .notice-column-content { padding: 2px !important; gap: 3px !important; }
+  .c1-document .notice-card-item { padding: 2.5px 4px !important; margin-bottom: 2px !important; border: 1px solid var(--line-soft) !important; background: var(--surface-muted) !important; }
+  .c1-document .notice-group-heading { font-size: 9.5px !important; font-weight: 700 !important; margin-bottom: 1px !important; }
+  .c1-document .notice-group-lines { display: flex !important; flex-direction: column !important; gap: 1px !important; }
+  .c1-document .notice-group-lines p { font-size: 9px !important; line-height: 1.25 !important; margin: 0 !important; }
 
   /* Compact availability & directives */
-  .c1-document .availability-group { padding: 2px 4px !important; margin-bottom: 3px !important; border-color: var(--line-soft) !important; }
-  .c1-document .availability-group h3 { padding: 2px 5px !important; font-size: 10.5px !important; margin-bottom: 1px !important; }
-  .c1-document .availability-row { padding: 1.5px 4px !important; font-size: 10px !important; line-height: 1.3 !important; }
-  .c1-document .register-group-label { padding: 1px 4px !important; font-size: 9px !important; }
-  .c1-document .notice-group { padding: 2.5px 5px !important; margin-bottom: 3px !important; }
-  .c1-document .notice-group h3 { padding: 2px 5px !important; font-size: 10.5px !important; }
-  .c1-document .notice-group p { padding: 2px 4px !important; font-size: 10px !important; line-height: 1.35 !important; }
+  .c1-document .availability-group { padding: 1.5px 3px !important; margin-bottom: 2px !important; border-color: var(--line-soft) !important; }
+  .c1-document .availability-group h3 { padding: 1px 3px !important; font-size: 9.5px !important; margin-bottom: 1px !important; }
+  .c1-document .availability-row { padding: 0.5px 2px !important; font-size: 8.5px !important; line-height: 1.2 !important; }
+  .c1-document .register-group-label { padding: 0.5px 2px !important; font-size: 8px !important; }
+  .c1-document .notice-group { padding: 1.5px 3px !important; margin-bottom: 2px !important; }
+  .c1-document .notice-group h3 { padding: 1px 3px !important; font-size: 9.5px !important; }
+  .c1-document .notice-group p { padding: 1px 2px !important; font-size: 8.5px !important; line-height: 1.2 !important; }
+
+  /* Sheet 3 & 5 compact wrappers */
+  .sheet-sheet-leave-special { font-size: 8.5px !important; }
+  .sheet-sheet-leave-special .chart-section { margin-top: 1px !important; }
+  .sheet-sheet-leave-special .chart-section h2 { padding: 1px 3px !important; font-size: 9px !important; margin-bottom: 1px !important; }
+  .sheet-sheet-leave-special .special-duty-block { margin-bottom: 1px !important; }
+  .sheet-sheet-leave-special .special-duty-block .duty-group { padding: 0.5px 2px !important; margin-bottom: 1px !important; }
+  .sheet-sheet-leave-special .special-duty-block .duty-group h4 { margin: 0 0 1px 0 !important; font-size: 8.5px !important; line-height: 1.15 !important; }
+  .sheet-sheet-leave-special .special-duty-block .document-assignment { font-size: 8px !important; line-height: 1.15 !important; }
+  .sheet-sheet-leave-special .special-duty-block .person-label { font-size: 8px !important; }
+  .sheet-sheet-leave-special .availability-group { padding: 1px 2px !important; margin-bottom: 1px !important; }
+  .sheet-sheet-leave-special .availability-group h3 { padding: 0.5px 2px !important; font-size: 8.5px !important; margin-bottom: 0 !important; }
+  .sheet-sheet-leave-special .availability-row { padding: 0 2px !important; font-size: 8px !important; line-height: 1.15 !important; }
+  .sheet-sheet-leave-special .availability-row .person-label { font-size: 8px !important; }
+
+  .sheet-sheet-officers-scan .c1-officers-scan-container { gap: 4px !important; }
+  .sheet-sheet-officers-scan .chart-section { margin-top: 3px !important; }
+  .sheet-sheet-officers-scan .c1-signoff { margin-top: 3px !important; padding-top: 3px !important; }
 
   /* Section grid layouts for print */
   .c1-document.is-a4-landscape .station-duty-columns { grid-template-columns: 1fr 1fr .92fr !important; }
+  .c1-document.is-a4-landscape .station-duty-columns.is-four-col,
+  .c1-document.is-a3-landscape .station-duty-columns.is-four-col { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .unified-chart-header { margin-bottom: 4px !important; padding-bottom: 3px !important; }
+  .unified-header-title { font-size: 12.5px !important; }
+  .unified-header-subtitle { font-size: 11.5px !important; }
+  .unified-header-date { font-size: 10px !important; }
   .c1-document.is-a4-landscape .c1-chowkis { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .c1-document.is-a3-landscape .c1-chowkis { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .c1-document.is-a4-portrait .c1-chowkis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
@@ -321,9 +404,12 @@
   .c1-document.is-a4-landscape .c1-notices-officers-grid,
   .c1-document.is-a3-landscape .c1-notices-officers-grid { grid-template-columns: 1.12fr 0.88fr !important; }
   .c1-document.is-a4-portrait .c1-notices-officers-grid { grid-template-columns: 1fr !important; }
-  .c1-document.is-a4-landscape .c1-availability { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-  .c1-document.is-a3-landscape .c1-availability { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .c1-document.is-a4-landscape .c1-availability { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  .c1-document.is-a3-landscape .c1-availability { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
   .c1-document.is-a4-portrait .c1-availability { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .c1-document.is-a4-landscape .c1-special-flow { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .c1-document.is-a3-landscape .c1-special-flow { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .c1-document.is-a4-portrait .c1-special-flow { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .c1-packed-roster-grid.cols-4 { grid-template-columns: 1fr 1fr 1.05fr 0.95fr !important; }
   .c1-packed-roster-grid.cols-3 { grid-template-columns: 1.2fr 1.1fr 1fr !important; }
   .c1-packed-roster-grid.cols-2 { grid-template-columns: 1.15fr 0.85fr !important; }

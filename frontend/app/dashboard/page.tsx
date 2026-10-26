@@ -26,9 +26,14 @@ const chrome = {
     directoryLoading: "Loading directory…", directoryUnavailable: "The staff directory could not be loaded.",
     openToday: "Open today’s chart", openChart: "Open chart", chartLoading: "Loading chart…", noSavedChart: "No saved chart",
     registered: "Registered staff", registeredNow: "Registered now", recordedPresent: "Present (recorded)",
+    present: "Present", absent: "Absent", onLeave: "On Leave",
     defaultPresent: "Present (default)", defaultHelp: "Default presence has not been confirmed by the clerk.",
     weeklyOff: "Weekly off", weeklyOffRecorded: "recorded", weeklyOffProfile: "from current staff profiles",
     recordedAbsent: "Absent (recorded)", unrecorded: "Not recorded", attendance: "Attendance for the selected date",
+    assignDutiesLink: "Assign & Manage Duties →",
+    dutyProgress: (assigned: number, total: number) => `${assigned} of ${total} duty charges assigned so far`,
+    allAssigned: (total: number) => `All ${total} duty charges assigned. Ready for review and print.`,
+    prepTomorrow: "Prepare Tomorrow’s Duty Chart →",
     loading: "Loading…", loadingDay: "Loading this day’s records…", unavailable: "This day’s records could not be loaded.",
     missing: "No chart is saved for this date.", retry: "Try again", draft: "Draft", validated: "Validated", finalized: "Finalized",
   },
@@ -37,9 +42,14 @@ const chrome = {
     directoryLoading: "नामावली लोड होत आहे…", directoryUnavailable: "कर्मचारी नामावली लोड करता आली नाही.",
     openToday: "आजचा तक्ता उघडा", openChart: "तक्ता उघडा", chartLoading: "तक्ता लोड होत आहे…", noSavedChart: "जतन केलेला तक्ता नाही",
     registered: "नोंदणीकृत कर्मचारी", registeredNow: "सध्या नोंदणीकृत", recordedPresent: "हजर (नोंदवलेले)",
+    present: "हजर", absent: "गैरहजर", onLeave: "रजेवर / सुट्टी",
     defaultPresent: "हजर (पूर्वनिर्धारित)", defaultHelp: "पूर्वनिर्धारित हजेरीला लेखनिकाने पुष्टी दिलेली नाही.",
     weeklyOff: "साप्ताहिक सुट्टी", weeklyOffRecorded: "नोंदवलेले", weeklyOffProfile: "सध्याच्या कर्मचारी नोंदींमधून",
     recordedAbsent: "गैरहजर (नोंदवलेले)", unrecorded: "नोंद नाही", attendance: "निवडलेल्या तारखेची हजेरी",
+    assignDutiesLink: "कर्तव्य वाटप व व्यवस्थापन →",
+    dutyProgress: (assigned: number, total: number) => `${total} पैकी ${assigned} कर्तव्ये नेमण्यात आली आहेत`,
+    allAssigned: (total: number) => `सर्व ${total} कर्तव्ये नेमली गेली आहेत. पडताळणी व प्रिंटसाठी तयार.`,
+    prepTomorrow: "उद्याचे कर्तव्य वाटप तयार करा →",
     loading: "लोड होत आहे…", loadingDay: "या दिवसाच्या नोंदी लोड होत आहेत…", unavailable: "या दिवसाच्या नोंदी लोड करता आल्या नाहीत.",
     missing: "या तारखेसाठी तक्ता जतन केलेला नाही.", retry: "पुन्हा प्रयत्न करा", draft: "मसुदा", validated: "तपासलेला", finalized: "अंतिम",
   },
@@ -141,6 +151,17 @@ export default function DashboardPage() {
   const weekday = !selectedDate ? "" : locale === "mr" ? weekdayMr(selectedDate)
     : new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${selectedDate}T00:00:00Z`));
 
+  const tomorrow = useMemo(() => {
+    if (!today) return "";
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  }, [today]);
+
+  const assignmentsCount = chart?.assignments.length ?? 0;
+  const filledAssignments = chart?.assignments.filter((a) => a.person !== null).length ?? 0;
+  const vacantAssignments = chart?.assignments.filter((a) => a.person === null).length ?? 0;
+
   return <div className={styles.page} lang={locale}>
     <header className={styles.heading}>
       <div className={styles.headingIdentity}>
@@ -158,6 +179,39 @@ export default function DashboardPage() {
       </div>
     </header>
 
+    {chart && assignmentsCount > 0 && (
+      <section className={styles.prepBanner}>
+        <div className={styles.prepInfo}>
+          <strong>
+            {filledAssignments >= assignmentsCount
+              ? copy.allAssigned(assignmentsCount)
+              : copy.dutyProgress(filledAssignments, assignmentsCount)}
+          </strong>
+          <span className={styles.prepDetail}>
+            {vacantAssignments > 0
+              ? `${vacantAssignments} ${locale === "mr" ? "जागा रिक्त आहेत" : "seats vacant"}`
+              : `${locale === "mr" ? "सर्व कर्तव्य जागा पूर्ण भरल्या आहेत" : "all seats occupied"}`}
+          </span>
+        </div>
+        <div className={styles.prepActions}>
+          <Link
+            href={`/daily-work/duties?date=${selectedDate}`}
+            className={styles.prepButton}
+          >
+            {copy.assignDutiesLink}
+          </Link>
+          {isToday && tomorrow && (
+            <Link
+              href={`/daily-work/duties?date=${tomorrow}`}
+              className={styles.prepButtonSecondary}
+            >
+              {copy.prepTomorrow}
+            </Link>
+          )}
+        </div>
+      </section>
+    )}
+
     <section className={styles.command} aria-label={copy.stationDirectory} lang="mr">
       <section className={styles.senior}>
         <span className={styles.label}>ठाणे प्रमुख</span>
@@ -174,7 +228,22 @@ export default function DashboardPage() {
     {mastersFailed && <div className={styles.inlineError} role="alert"><span>{copy.directoryUnavailable}</span><button type="button" onClick={retry}>{copy.retry}</button></div>}
 
     <section className={styles.strength} aria-label={copy.attendance}>
-      <div className={styles.metric}><span className={styles.label}>{isToday ? copy.registered : copy.registeredNow}</span><span className={styles.value}>{masters ? strength.registered : <span aria-label={copy.loading}>…</span>}</span></div>
+      <div className={`${styles.metric} ${styles.metricPrimary}`}>
+        <span className={styles.label}>{isToday ? copy.registered : copy.registeredNow}</span>
+        <span className={styles.value}>{masters ? strength.registered : <span aria-label={copy.loading}>…</span>}</span>
+      </div>
+      <div className={`${styles.metric} ${styles.metricPresent}`}>
+        <span className={styles.label}>{copy.present}</span>
+        <span className={styles.value}>{attendanceReady ? (strength.recordedPresent + strength.defaultPresent) : <span aria-label={copy.loading}>…</span>}</span>
+      </div>
+      <div className={`${styles.metric} ${styles.metricAbsent}`}>
+        <span className={styles.label}>{copy.absent}</span>
+        <span className={styles.value}>{attendanceReady ? strength.recordedAbsent : <span aria-label={copy.loading}>…</span>}</span>
+      </div>
+      <div className={`${styles.metric} ${styles.metricLeave}`}>
+        <span className={styles.label}>{copy.onLeave}</span>
+        <span className={styles.value}>{attendanceReady ? strength.weeklyOff : <span aria-label={copy.loading}>…</span>}</span>
+      </div>
       <div className={styles.metric}><span className={styles.label}>{copy.recordedPresent}</span><span className={styles.value}>{attendanceReady ? strength.recordedPresent : <span aria-label={copy.loading}>…</span>}</span></div>
       <div className={styles.metric} title={copy.defaultHelp}><span className={styles.label}>{copy.defaultPresent}</span><span className={styles.value}>{attendanceReady ? strength.defaultPresent : <span aria-label={copy.loading}>…</span>}</span></div>
       <div className={styles.metric} title={attendanceReady ? `${strength.recordedWeeklyOff} ${copy.weeklyOffRecorded}; ${strength.profileWeeklyOff} ${copy.weeklyOffProfile}` : undefined}><span className={styles.label}>{copy.weeklyOff}</span><span className={styles.value}>{attendanceReady ? strength.weeklyOff : <span aria-label={copy.loading}>…</span>}</span></div>

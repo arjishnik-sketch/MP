@@ -4,24 +4,35 @@
  * Last meaningful change: 2026-10-18 — localized toolbar with accessible date navigation.
  * Constraint: Shared primitives own portals, dismissal, focus restoration and trigger state.
  */
-.toolbar { background: var(--surface-muted); border-color: var(--line); color: var(--ink); font-size: .875rem; }
+.toolbar {
+  background: var(--surface-muted);
+  border-color: var(--line);
+  color: var(--ink);
+  font-size: .8125rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
 .versionField,
-.dateControl { display: flex; min-width: 0; align-items: center; gap: 8px; }
-.versionField { flex: 0 1 auto; }
-.dateControl { flex: 0 1 auto; }
-.label { color: var(--muted); font-size: .875rem; font-weight: 600; white-space: nowrap; }
-.dateTrigger { min-width: 190px; justify-content: space-between; }
-.triggerValue { display: flex; min-width: 0; flex-wrap: wrap; gap: 4px 8px; text-align: left; }
-.weekday { color: var(--muted); }
+.dateControl { display: flex; min-width: 0; align-items: center; gap: 5px; flex-shrink: 0; }
+.versionField { flex: 0 0 auto; }
+.dateControl { flex: 0 0 auto; }
+.label { color: var(--muted); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.dateTrigger { min-width: 165px; height: 30px; padding: 2px 8px; justify-content: space-between; font-size: .8125rem; }
+.triggerValue { display: flex; min-width: 0; flex-wrap: nowrap; gap: 4px; text-align: left; }
+.weekday { color: var(--muted); font-size: .75rem; }
 
-.viewToggle { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 3px; }
-.viewToggle button { min-height: 32px; border: 0; border-radius: 4px; background: transparent; padding: 5px 12px; color: var(--muted); font-size: .875rem; font-weight: 600; white-space: nowrap; }
+.viewToggle { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); padding: 2px; flex-shrink: 0; }
+.viewToggle button { min-height: 26px; height: 26px; border: 0; border-radius: 3px; background: transparent; padding: 2px 8px; color: var(--muted); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
 .viewToggle button:hover,
 .viewToggle button[aria-pressed="true"] { background: var(--band); color: var(--ink); }
 .viewToggle button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .viewToggle button:disabled { cursor: default; opacity: .5; }
 
-.paperControl { display: flex; align-items: center; gap: 6px; }
+.paperControl { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 
 .datePopover.datePopover {
   display: flex;

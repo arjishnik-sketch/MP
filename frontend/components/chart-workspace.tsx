@@ -102,40 +102,19 @@ function Section({ title, count, children, id, className = "" }: {
   );
 }
 
-function DocumentHeader({ chart }: { chart: ChartDocument }) {
-  const title = displayText(chart.template.labels["head.h1"]) || "नाशिक शहर पोलीस आयुक्तालय";
-  const subtitle = displayText(chart.template.labels["head.h2"]) || "दैनिक कर्तव्य वाटप";
-  const labels = chart.template.overrides.labels as Record<string, unknown> | undefined;
-  return <header className="chart-title-lines">
-    <strong className="chart-title-line chart-title-line-heading">{displayText(labels?.["head.h1"]) || title}</strong>
-    <span className="chart-title-line chart-title-line-heading">{displayText(labels?.["head.h2"]) || subtitle}</span>
-    <time className="chart-title-line chart-title-line-value" dateTime={chart.chartDate}>{chartDateLabel(chart.chartDate)}, {chart.weekdayMr}</time>
-  </header>;
-}
-
-function CompactDocumentHeader({ chart, sheetIndex, totalSheets, sheetTitle }: {
-  chart: ChartDocument;
-  sheetIndex?: number;
-  totalSheets?: number;
-  sheetTitle?: string;
-}) {
+function UnifiedChartHeader({ chart }: { chart: ChartDocument }) {
   const title = displayText(chart.template.labels["head.h1"]) || "नाशिक शहर पोलीस आयुक्तालय";
   const subtitle = displayText(chart.template.labels["head.h2"]) || "दैनिक कर्तव्य वाटप";
   const labels = chart.template.overrides.labels as Record<string, unknown> | undefined;
   const h1 = displayText(labels?.["head.h1"]) || title;
   const h2 = displayText(labels?.["head.h2"]) || subtitle;
   return (
-    <header className="compact-sheet-header">
-      <div className="compact-header-title">
-        <strong>{h1}</strong> <span>— {h2}</span>
-        {sheetTitle && <span className="compact-header-subtitle"> | {sheetTitle}</span>}
-      </div>
-      <div className="compact-header-meta">
-        <time dateTime={chart.chartDate}>{chartDateLabel(chart.chartDate)}, {chart.weekdayMr}</time>
-        {typeof sheetIndex === "number" && typeof totalSheets === "number" && (
-          <span className="compact-page-number">पृष्ठ {devanagari(sheetIndex + 1)} / {devanagari(totalSheets)}</span>
-        )}
-      </div>
+    <header className="unified-chart-header">
+      <h1 className="unified-header-title">{h1}</h1>
+      <div className="unified-header-subtitle">{h2}</div>
+      <time className="unified-header-date" dateTime={chart.chartDate}>
+        {chartDateLabel(chart.chartDate)}, {chart.weekdayMr}
+      </time>
     </header>
   );
 }
@@ -299,6 +278,20 @@ function CommandLeadershipSection({
   const seniorSupport = [...layout.seniorSupport, ...sourceSupportGroups];
   const separateWriters = unambiguousWriters ? [] : [...layout.writerGroups.values()].flat();
 
+  const groupedNotices = useMemo(() => {
+    const list: { groupKey: string | null; items: Notice[] }[] = [];
+    const indexMap = new Map<string, number>();
+    for (const n of chart.notices) {
+      const key = (n.groupKey ?? "").trim();
+      if (!indexMap.has(key)) {
+        indexMap.set(key, list.length);
+        list.push({ groupKey: n.groupKey, items: [] });
+      }
+      list[indexMap.get(key)!].items.push(n);
+    }
+    return list;
+  }, [chart.notices]);
+
   return (
     <div className="command-section-wrapper" data-document-section="command">
       <section className="senior-command" aria-label="ठाणे प्रमुख">
@@ -317,14 +310,42 @@ function CommandLeadershipSection({
           {unambiguousWriters && <DutyGroups groups={layout.writerGroups.get(writerKeys[index]) ?? []} editMode={editMode} onSelect={onSelect} onAddSeat={onAddSeat} compact />}
         </section>)}
       </div>
-      <div className="station-duty-columns">
-        {stationColumns.map(({ shift, groups }) => <section className="station-duty-column" key={shift}>
-          <h3>{shift === "DAY" ? "दिवसपाळी कर्तव्य" : "रात्रपाळी कर्तव्य"}<span>{shift === "DAY" ? "०९:०० ते २१:००" : "२१:०० ते ०९:००"}</span></h3>
-          <DutyGroups groups={groups} editMode={editMode} onSelect={onSelect} onAddSeat={onAddSeat} />
-        </section>)}
+      <div className="station-duty-columns is-four-col">
+        {stationColumns.map(({ shift, groups }) => (
+          <section className={`station-duty-column ${shift === "DAY" ? "day-column" : "night-column"}`} key={shift}>
+            <h3>{shift === "DAY" ? "दिवसपाळी कर्तव्य" : "रात्रपाळी कर्तव्य"}<span>{shift === "DAY" ? "०९:०० ते २१:००" : "२१:०० ते ०९:००"}</span></h3>
+            <DutyGroups groups={groups} editMode={editMode} onSelect={onSelect} onAddSeat={onAddSeat} />
+          </section>
+        ))}
         <section className="station-duty-column office-duty-column">
           <h3>कार्यालयीन शाखा व कारकून</h3>
           <DutyGroups groups={[...layout.officeCore, ...separateWriters]} editMode={editMode} onSelect={onSelect} onAddSeat={onAddSeat} />
+        </section>
+        <section className="station-duty-column notice-duty-column">
+          <h3>सूचना व निर्देश</h3>
+          <div className="notice-column-content">
+            {groupedNotices.length > 0 ? (
+              groupedNotices.map((g, idx) => (
+                <div key={idx} className="notice-card-item">
+                  {g.groupKey && g.groupKey !== "सूचना" && <h4 className="notice-group-heading">{g.groupKey}</h4>}
+                  <div className="notice-group-lines">
+                    {g.items.map((n) => (
+                      <p key={n.noticeId} className="cell-pre text-xs">{n.textMr}</p>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="document-empty">नोंद नाही</p>
+            )}
+            {editMode && (
+              <div className="no-print pt-2 mt-2 border-t border-slate-200">
+                <Link href={`/daily-work/registers?date=${chart.chartDate}&tab=notices`} className="text-xs text-navy hover:underline">
+                  + सूचना संपादन
+                </Link>
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>
@@ -995,16 +1016,7 @@ export function ChartDocumentView({
               </div>
             )}
 
-            {sheetIndex === 0 ? (
-              <DocumentHeader chart={chart} />
-            ) : (
-              <CompactDocumentHeader
-                chart={chart}
-                sheetIndex={sheetIndex}
-                totalSheets={plannedSheets.length}
-                sheetTitle={sheet.titleMr}
-              />
-            )}
+            <UnifiedChartHeader chart={chart} />
 
             {sheet.sections.includes("command") && (
               <CommandLeadershipSection
@@ -1026,7 +1038,30 @@ export function ChartDocumentView({
               />
             )}
 
-            {sheet.sections.includes("special-duties") && sheet.sections.includes("scan-schedule") ? (
+            {sheet.id === "sheet-leave-special" ? (
+              <div className="c1-leave-special-container" data-document-section="leave-special">
+                {sheet.sections.includes("availability") && (
+                  <AvailabilitySection
+                    date={date}
+                    chart={chart}
+                    editMode={editMode}
+                    onSaved={onRefresh}
+                    columns={metrics.availabilityColumns}
+                    forceColumns
+                  />
+                )}
+                {sheet.sections.includes("special-duties") && (
+                  <SpecialDutiesSection
+                    layout={layout}
+                    editMode={editMode}
+                    onSelect={setSelected}
+                    onEditState={setLocationStateTarget}
+                    onAddSeat={(group) => setAddSeatTarget({ shift: group.shift, columnNo: group.columnNo, dutyTitleMr: group.title })}
+                    columns={metrics.specialColumns}
+                  />
+                )}
+              </div>
+            ) : sheet.sections.includes("special-duties") && sheet.sections.includes("scan-schedule") ? (
               <div className="c1-special-scan-grid">
                 <SpecialDutiesSection
                   layout={layout}
@@ -1056,7 +1091,7 @@ export function ChartDocumentView({
               </>
             )}
 
-            {sheet.sections.includes("availability") && (
+            {sheet.id !== "sheet-leave-special" && sheet.sections.includes("availability") && (
               <AvailabilitySection
                 date={date}
                 chart={chart}
@@ -1092,6 +1127,14 @@ export function ChartDocumentView({
                   <SuddenChangesSection date={date} chart={chart} editMode={editMode} onSaved={onRefresh} />
                 </div>
                 <FreeTablesEditor chart={chart} editMode={editMode} onStructureOp={structureOp} />
+                <ChartSignoff chart={chart} />
+              </div>
+            )}
+
+            {sheet.sections.includes("officers-scan") && (
+              <div className="c1-officers-scan-container" data-document-section="officers-scan">
+                <OfficerRegister date={date} chart={chart} editMode={editMode} onSaved={onRefresh} />
+                <ScanSection date={chart.chartDate} chart={chart} editMode={editMode} onSaved={onRefresh} />
                 <ChartSignoff chart={chart} />
               </div>
             )}
